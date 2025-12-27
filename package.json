@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "migrate:firestore": "node scripts/migrate-mongo-to-firestore.js"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.19"
+  }
+}
