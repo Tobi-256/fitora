@@ -13,7 +13,7 @@ export const Register = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'info' | 'otp'>('info');
   const [formData, setFormData] = useState<{ name: string; email: string; password: string } | null>(null);
-  const [otpSent, setOtpSent] = useState(false);
+  const [, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null);
   const [form] = Form.useForm();
@@ -48,8 +48,8 @@ export const Register = () => {
             setLoading(false);
             return;
           }
-        } catch (cleanupError) {
-          console.error('Cleanup error:', cleanupError);
+        } catch {
+          // intentionally left blank
           message.error('This email is already in use. Please login or use a different email.');
           setLoading(false);
           return;
@@ -66,7 +66,7 @@ export const Register = () => {
         
         // Log OTP for testing (only in development)
         if (otpResponse.otp) {
-          console.log('🔐 OTP Code (for testing):', otpResponse.otp);
+          // ...existing code...
         }
       } else {
         message.error(otpResponse.message || 'Không thể gửi OTP. Vui lòng thử lại.');
@@ -105,13 +105,13 @@ export const Register = () => {
         // OTP verification failed - show clear error message
         const errorMsg = verifyResponse.message || 'Invalid OTP. Please check your OTP code again.';
         message.error(errorMsg);
-        console.error('OTP verification failed:', errorMsg);
+        // ...existing code...
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       // Handle network errors or other unexpected errors
-      const errorMessage = error instanceof Error ? error.message : 'Unable to verify OTP. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to verify OTP. Please try again.';
       message.error(errorMessage);
-      console.error('OTP verification error:', error);
+      // ...existing code...
     } finally {
       setOtpLoading(false);
     }
@@ -126,7 +126,7 @@ export const Register = () => {
       if (otpResponse.success) {
         message.success(otpResponse.message);
         if (otpResponse.otp) {
-          console.log('🔐 New OTP Code (for testing):', otpResponse.otp);
+          // ...existing code...
         }
       } else {
         message.error(otpResponse.message || 'Unable to send OTP. Please try again.');
@@ -184,7 +184,8 @@ export const Register = () => {
                           return Promise.reject(new Error('This email is already in use. Please login or use a different email.'));
                         }
                         return Promise.resolve();
-                      } catch (error) {
+                      } catch {
+                        // intentionally left blank
                         // If check fails, don't block user (might be network issue)
                         return Promise.resolve();
                       }

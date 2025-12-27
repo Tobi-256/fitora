@@ -32,7 +32,7 @@ export const ForgotPassword = () => {
         
         // Log OTP for testing (only in development)
         if (result.otp) {
-          console.log('🔐 Reset Password OTP Code (for testing):', result.otp);
+          // ...existing code...
         }
       } else {
         message.error(result.message || 'Unable to send OTP. Please try again.');
@@ -96,7 +96,7 @@ export const ForgotPassword = () => {
       if (result.success) {
         message.success(result.message);
         if (result.otp) {
-          console.log('🔐 New Reset Password OTP Code (for testing):', result.otp);
+          // ...existing code...
         }
       } else {
         message.error(result.message || 'Unable to send OTP. Please try again.');
@@ -229,7 +229,8 @@ export const ForgotPassword = () => {
                   >
                     Change Email
                   </Button>
-                  <span style={{ color: '#666', margin: '0 8px' }}>|</span>
+                </div>
+                <div style={{ textAlign: 'center', marginTop: '8px' }}>
                   <Link to="/login" style={{ color: '#000', textDecoration: 'underline', fontSize: '13px' }}>
                     <ArrowLeftOutlined /> Back to Login
                   </Link>
@@ -307,7 +308,8 @@ export const ForgotPassword = () => {
                   >
                     Back to OTP
                   </Button>
-                  <span style={{ color: '#666', margin: '0 8px' }}>|</span>
+                </div>
+                <div style={{ textAlign: 'center', marginTop: '8px' }}>
                   <Link to="/login" style={{ color: '#000', textDecoration: 'underline', fontSize: '13px' }}>
                     <ArrowLeftOutlined /> Back to Login
                   </Link>

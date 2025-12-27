@@ -113,11 +113,8 @@ export const uploadAvatar = async (file: File): Promise<{ avatarUrl: string; use
   const formData = new FormData();
   formData.append('avatar', file);
   
-  const response = await api.post('/users/me/avatar', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  // Don't set Content-Type header, let browser set it automatically with boundary
+  const response = await api.post('/users/me/avatar', formData);
   return response.data;
 };
 
