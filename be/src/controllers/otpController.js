@@ -2,11 +2,6 @@ import { generateOTP, storeOTP, verifyOTP, getOTP } from '../services/otpService
 import { sendMail } from '../utils/email.js';
 import { getRegistrationOTPTemplate, getPasswordResetOTPTemplate } from '../utils/emailTemplates.js';
 
-/**
- * POST /api/otp/send
- * Send OTP code via email
- * Query params: type=registration (default) | password-reset
- */
 export const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -19,7 +14,6 @@ export const sendOTP = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -28,11 +22,9 @@ export const sendOTP = async (req, res) => {
       });
     }
 
-    // Generate OTP
     const otp = generateOTP();
     storeOTP(email, otp);
 
-    // Select email template based on type
     let emailTemplate;
     if (type === 'password-reset') {
       emailTemplate = getPasswordResetOTPTemplate(otp);
@@ -40,7 +32,6 @@ export const sendOTP = async (req, res) => {
       emailTemplate = getRegistrationOTPTemplate(otp);
     }
 
-    // Send email
     try {
       await sendMail({
         to: email,
@@ -49,7 +40,6 @@ export const sendOTP = async (req, res) => {
         text: emailTemplate.text,
       });
 
-      console.log(`✅ OTP sent to ${email}: ${otp}`); // Log for testing
 
       res.json({
         success: true,
@@ -58,27 +48,28 @@ export const sendOTP = async (req, res) => {
         otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
       });
     } catch (emailError) {
-      console.error('❌ Send email error:', emailError);
-      
-      // If email config is missing, still return OTP for testing
-      if (emailError.message?.includes('Email configuration is missing')) {
-        console.log(`⚠️ Email not configured. OTP for ${email}: ${otp}`);
+      // If email config is missing or network/SMTP error occurs, in development return success with OTP
+      const isDev = process.env.NODE_ENV !== 'production';
+      const isConfigMissing = emailError.message?.includes('Email configuration is missing');
+      const isNetworkError = emailError.code === 'ESOCKET' || emailError.code === 'ECONNRESET' || emailError.code === 'ENOTFOUND';
+
+      if (isConfigMissing || (isDev && isNetworkError)) {
         return res.json({
           success: true,
-          message: 'OTP code has been generated (Email not configured, check console to see OTP).',
-          otp: otp, // Return OTP for testing
+          message: isConfigMissing
+            ? 'OTP code has been generated (Email not configured, check console to see OTP).'
+            : 'OTP code generated (email send failed in development).',
+          otp: otp,
         });
       }
-      
+
       return res.status(500).json({
         success: false,
         message: emailError.message || 'Unable to send email. Please check email configuration or try again later.',
-        // In development, still return OTP for testing
-        ...(process.env.NODE_ENV !== 'production' && { otp }),
+        ...(isDev && { otp }),
       });
     }
   } catch (error) {
-    console.error('Send OTP error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while sending OTP!',
@@ -86,10 +77,6 @@ export const sendOTP = async (req, res) => {
   }
 };
 
-/**
- * POST /api/otp/verify
- * Verify OTP code
- */
 export const verifyOTPCode = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -102,7 +89,6 @@ export const verifyOTPCode = async (req, res) => {
       });
     }
 
-    // Validate OTP format (6 digits)
     if (!/^\d{6}$/.test(otp)) {
       return res.status(400).json({
         success: false,
@@ -110,7 +96,6 @@ export const verifyOTPCode = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -119,9 +104,6 @@ export const verifyOTPCode = async (req, res) => {
       });
     }
 
-    // For registration, remove OTP after verification
-    // For password reset, keep OTP until password is reset
-    // Check if this is password reset by checking if type is in query or body
     const isPasswordReset = req.query.type === 'password-reset' || req.body.type === 'password-reset';
     const removeAfterVerify = !isPasswordReset;
     const result = verifyOTP(email, otp, removeAfterVerify);
@@ -139,7 +121,6 @@ export const verifyOTPCode = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Verify OTP error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while verifying OTP!',

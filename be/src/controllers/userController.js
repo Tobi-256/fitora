@@ -1,5 +1,13 @@
-import User from '../models/user.js';
 import { auth } from '../config/firebase.js';
+import {
+  findUserByFirebaseUid,
+  findUserByEmail,
+  findUserByPhone,
+  createOrUpdateUser,
+  updateUserByFirebaseUid,
+  listUsers,
+  deleteUserByFirebaseUid,
+} from '../services/userService.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -63,14 +71,14 @@ export const resetPasswordAfterOTP = async (req, res) => {
       // Password reset successful, now remove OTP
       removeOTP(email);
 
-      console.log(`✅ Password reset successfully for user: ${email}`);
+      // ...existing code...
 
       return res.json({
         success: true,
         message: 'Password has been reset successfully!',
       });
     } catch (firebaseError) {
-      console.error('Firebase password reset error:', firebaseError);
+      // ...existing code...
       
       if (firebaseError.code === 'auth/user-not-found') {
         return res.status(404).json({
@@ -92,7 +100,7 @@ export const resetPasswordAfterOTP = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Reset password error:', error);
+    // ...existing code...
     res.status(500).json({
       success: false,
       message: 'Server error while resetting password!',
@@ -106,9 +114,14 @@ export const resetPasswordAfterOTP = async (req, res) => {
  */
 export const checkEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    // ...existing code...
+
+    // Accept email from body or query and trim
+    const rawEmail = (req.body && req.body.email) || req.query.email || '';
+    const email = typeof rawEmail === 'string' ? rawEmail.trim() : '';
 
     if (!email) {
+      // ...existing code...
       return res.status(400).json({
         success: false,
         message: 'Email is required!',
@@ -118,6 +131,7 @@ export const checkEmail = async (req, res) => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      // ...existing code...
       return res.status(400).json({
         success: false,
         message: 'Invalid email format!',
@@ -146,14 +160,14 @@ export const checkEmail = async (req, res) => {
       }
       
       // Other Firebase errors
-      console.error('Check email error:', error);
+      // ...existing code...
       return res.status(500).json({
         success: false,
         message: 'Error checking email. Please try again later.',
       });
     }
   } catch (error) {
-    console.error('Check email error:', error);
+    // ...existing code...
     res.status(500).json({
       success: false,
       message: 'Server error while checking email!',
@@ -167,7 +181,11 @@ export const checkEmail = async (req, res) => {
  */
 export const checkPhone = async (req, res) => {
   try {
-    const { phone, excludeUserId } = req.body;
+    // ...existing code...
+
+    const rawPhone = (req.body && req.body.phone) || req.query.phone || '';
+    const phone = typeof rawPhone === 'string' ? rawPhone.trim() : '';
+    const excludeUserId = (req.body && req.body.excludeUserId) || req.query.excludeUserId || undefined;
 
     if (!phone) {
       return res.status(400).json({
@@ -177,7 +195,7 @@ export const checkPhone = async (req, res) => {
     }
 
     // If phone is empty string, it's available
-    if (phone.trim() === '') {
+    if (phone === '') {
       return res.json({
         success: true,
         exists: false,
@@ -194,13 +212,8 @@ export const checkPhone = async (req, res) => {
       });
     }
 
-    // Check if phone exists in MongoDB
-    const query = { phone: phone.trim() };
-    if (excludeUserId) {
-      query._id = { $ne: excludeUserId };
-    }
-
-    const existingUser = await User.findOne(query);
+    // Check if phone exists in Firestore
+    const existingUser = await findUserByPhone(phone.trim(), excludeUserId);
 
     if (existingUser) {
       return res.json({
@@ -216,7 +229,7 @@ export const checkPhone = async (req, res) => {
       message: 'Phone number is available.',
     });
   } catch (error) {
-    console.error('Check phone error:', error);
+    // ...existing code...
     res.status(500).json({
       success: false,
       message: 'Server error while checking phone number!',
@@ -239,32 +252,8 @@ export const syncUser = async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    let user = await User.findOne({ firebaseUid });
-
-    if (user) {
-      // Update information if there are changes
-      user.email = email;
-      if (name) user.name = name;
-      if (avatarUrl) user.avatarUrl = avatarUrl;
-      await user.save();
-
-      return res.json({
-        message: 'User information synced successfully!',
-        user: {
-          id: user._id,
-          firebaseUid: user.firebaseUid,
-          email: user.email,
-          name: user.name,
-          avatarUrl: user.avatarUrl,
-          role: user.role,
-          isPremium: user.isPremium,
-        },
-      });
-    }
-
-    // Create new user
-    user = new User({
+    // Create or update user in Firestore (doc id = firebaseUid)
+    const user = await createOrUpdateUser({
       firebaseUid,
       email,
       name: name || '',
@@ -273,12 +262,10 @@ export const syncUser = async (req, res) => {
       isPremium: false,
     });
 
-    await user.save();
-
-    res.status(201).json({
-      message: 'Account created successfully!',
+    res.status(user ? 200 : 201).json({
+      message: 'Account synced successfully!',
       user: {
-        id: user._id,
+        id: user.id,
         firebaseUid: user.firebaseUid,
         email: user.email,
         name: user.name,
@@ -288,7 +275,7 @@ export const syncUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Sync user error:', error);
+    // ...existing code...
 
     if (error.code === 11000) {
       // Duplicate key error
@@ -311,16 +298,16 @@ export const syncUser = async (req, res) => {
  */
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findOne({ firebaseUid: req.user.firebaseUid });
+    const user = await findUserByFirebaseUid(req.user.firebaseUid);
 
     if (!user) {
-      return res.status(404).json({ 
-        message: 'User not found in system!' 
+      return res.status(404).json({
+        message: 'User not found in system!',
       });
     }
 
     res.json({
-      id: user._id,
+      id: user.id,
       firebaseUid: user.firebaseUid,
       email: user.email,
       name: user.name,
@@ -335,7 +322,7 @@ export const getProfile = async (req, res) => {
       updatedAt: user.updatedAt,
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    // ...existing code...
     res.status(500).json({ 
       message: 'Server error while getting user information!' 
     });
@@ -349,62 +336,111 @@ export const getProfile = async (req, res) => {
  */
 export const uploadAvatar = async (req, res) => {
   try {
+    // ...existing code...
+    
     if (!req.file) {
+      // ...existing code...
       return res.status(400).json({
         message: 'No file uploaded!',
       });
     }
 
-    const user = await User.findOne({ firebaseUid: req.user.firebaseUid });
+    // ...existing code...
+    let user = await findUserByFirebaseUid(req.user.firebaseUid);
 
     if (!user) {
-      return res.status(404).json({
-        message: 'User not found in system!',
-      });
-    }
-
-    // Delete old avatar if exists
-    if (user.avatarUrl && (user.avatarUrl.includes('/uploads/avatars/') || user.avatarUrl.includes('/api/uploads/avatars/'))) {
-      // Remove /api prefix if exists for file system path
-      const filePath = user.avatarUrl.replace('/api', '');
-      const oldAvatarPath = path.join(__dirname, '../../public', filePath);
-      
+      // ...existing code...
       try {
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-          console.log('✅ Deleted old avatar:', oldAvatarPath);
+        const existingUserByEmail = await findUserByEmail(req.user.email);
+        if (existingUserByEmail) {
+          // Link existing user record to this firebaseUid
+          await updateUserByFirebaseUid(req.user.firebaseUid, {
+            firebaseUid: req.user.firebaseUid,
+            email: existingUserByEmail.email,
+            name: req.user.name || existingUserByEmail.name,
+            avatarUrl: req.user.picture || existingUserByEmail.avatarUrl,
+          });
+          user = await findUserByFirebaseUid(req.user.firebaseUid);
+        } else {
+          user = await createOrUpdateUser({
+            firebaseUid: req.user.firebaseUid,
+            email: req.user.email || '',
+            name: req.user.name || '',
+            avatarUrl: req.user.picture || '',
+            phone: '',
+            address: '',
+            gender: '',
+            dateOfBirth: null,
+            role: 'user',
+            isPremium: false,
+          });
         }
-      } catch (err) {
-        console.warn('⚠️ Failed to delete old avatar:', err);
+      } catch (createError) {
+        // ...existing code...
+        return res.status(500).json({
+          message: 'Failed to sync user. Please try again.',
+          error: process.env.NODE_ENV === 'development' ? (createError instanceof Error ? createError.message : String(createError)) : undefined,
+        });
       }
     }
 
-    // Update avatar URL (without /api prefix, will be added in frontend)
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    user.avatarUrl = avatarUrl;
-    await user.save();
-    
-    console.log('✅ Avatar uploaded:', avatarUrl);
-    console.log('📁 File saved to:', path.join(__dirname, '../../public', avatarUrl));
-    console.log('👤 User updated:', user.email, 'avatarUrl:', user.avatarUrl);
+    // ...existing code...
+    if (user && user.avatarUrl && (user.avatarUrl.includes('/uploads/avatars/') || user.avatarUrl.includes('/api/uploads/avatars/'))) {
+      const filePath = user.avatarUrl.replace('/api', '');
+      const oldAvatarPath = path.join(__dirname, '../../public', filePath);
+      try {
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+          // ...existing code...
+        }
+      } catch (err) {
+        // ...existing code...
+      }
+    }
 
-    res.json({
+    // ...existing code...
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    await updateUserByFirebaseUid(req.user.firebaseUid, { avatarUrl });
+    user = await findUserByFirebaseUid(req.user.firebaseUid);
+
+    // ...existing code...
+
+    return res.json({
       message: 'Avatar uploaded successfully!',
-      avatarUrl: avatarUrl,
+      avatarUrl,
       user: {
-        id: user._id,
-        firebaseUid: user.firebaseUid,
-        email: user.email,
-        name: user.name,
-        avatarUrl: user.avatarUrl,
-        role: user.role,
-        isPremium: user.isPremium,
+        id: user?.id,
+        firebaseUid: user?.firebaseUid,
+        email: user?.email,
+        name: user?.name,
+        avatarUrl: user?.avatarUrl,
+        role: user?.role,
+        isPremium: user?.isPremium,
       },
     });
   } catch (error) {
-    console.error('Upload avatar error:', error);
+    // ...existing code...
+    
+    // Handle MongoDB duplicate key error (code 11000)
+    if (error && error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern || {})[0];
+      return res.status(400).json({
+        message: `${duplicateField} already exists in the system!`,
+      });
+    }
+    
+    // Handle validation errors
+    if (error && error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: 'Validation error: ' + (error.message || 'Invalid data'),
+      });
+    }
+    
     res.status(500).json({
       message: 'Server error while uploading avatar!',
+      error: process.env.NODE_ENV === 'development' 
+        ? (error instanceof Error ? error.message : String(error))
+        : undefined,
     });
   }
 };
@@ -417,81 +453,76 @@ export const uploadAvatar = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, avatarUrl, phone, address, gender, dateOfBirth } = req.body;
-
-    const user = await User.findOne({ firebaseUid: req.user.firebaseUid });
+    // Load user from Firestore
+    const user = await findUserByFirebaseUid(req.user.firebaseUid);
 
     if (!user) {
-      return res.status(404).json({ 
-        message: 'User not found in system!' 
+      return res.status(404).json({
+        message: 'User not found in system!',
       });
     }
 
-    // Update allowed fields
-    if (name !== undefined) user.name = name;
-    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+    // Prepare updates object
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
     if (phone !== undefined) {
-      // If phone is being updated and not empty, check if it's already in use by another user
-      if (phone.trim() !== '' && phone.trim() !== user.phone) {
-        const existingUser = await User.findOne({ 
-          phone: phone.trim(),
-          _id: { $ne: user._id }
-        });
-        
+      const trimmed = phone.trim();
+      if (trimmed !== '') {
+        const existingUser = await findUserByPhone(trimmed, user.id);
         if (existingUser) {
-          return res.status(400).json({ 
-            message: 'This phone number is already in use by another account!' 
+          return res.status(400).json({
+            message: 'This phone number is already in use by another account!',
           });
         }
       }
-      user.phone = phone.trim();
+      updates.phone = trimmed;
     }
-    if (address !== undefined) user.address = address;
+    if (address !== undefined) updates.address = address;
     if (gender !== undefined) {
-      // Validate gender value
       if (gender === '' || ['male', 'female', 'other'].includes(gender)) {
-        user.gender = gender;
+        updates.gender = gender;
       } else {
-        return res.status(400).json({ 
-          message: 'Invalid gender value! Must be "male", "female", "other", or empty string.' 
+        return res.status(400).json({
+          message: 'Invalid gender value! Must be "male", "female", "other", or empty string.',
         });
       }
     }
     if (dateOfBirth !== undefined) {
-      // If dateOfBirth is empty string or null, set to null
       if (dateOfBirth === '' || dateOfBirth === null) {
-        user.dateOfBirth = null;
+        updates.dateOfBirth = null;
       } else {
-        // Parse date string to Date object
         const date = new Date(dateOfBirth);
         if (isNaN(date.getTime())) {
-          return res.status(400).json({ 
-            message: 'Invalid date format! Please use YYYY-MM-DD format.' 
+          return res.status(400).json({
+            message: 'Invalid date format! Please use YYYY-MM-DD format.',
           });
         }
-        user.dateOfBirth = date;
+        updates.dateOfBirth = date;
       }
     }
 
-    await user.save();
+    // Apply updates to Firestore
+    const updated = await updateUserByFirebaseUid(req.user.firebaseUid, updates);
 
     res.json({
       message: 'Information updated successfully!',
       user: {
-        id: user._id,
-        firebaseUid: user.firebaseUid,
-        email: user.email,
-        name: user.name,
-        avatarUrl: user.avatarUrl,
-        phone: user.phone || '',
-        address: user.address || '',
-        gender: user.gender || '',
-        dateOfBirth: user.dateOfBirth || null,
-        role: user.role,
-        isPremium: user.isPremium,
+        id: updated.id,
+        firebaseUid: updated.firebaseUid,
+        email: updated.email,
+        name: updated.name,
+        avatarUrl: updated.avatarUrl,
+        phone: updated.phone || '',
+        address: updated.address || '',
+        gender: updated.gender || '',
+        dateOfBirth: updated.dateOfBirth || null,
+        role: updated.role,
+        isPremium: updated.isPremium,
       },
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    // ...existing code...
     
     // Handle duplicate phone number error
     if (error.code === 11000 && error.keyPattern?.phone) {
@@ -521,7 +552,7 @@ export const logout = async (req, res) => {
       message: 'Logged out successfully!' 
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    // ...existing code...
     res.status(500).json({ 
       message: 'Server error!' 
     });
@@ -535,11 +566,11 @@ export const logout = async (req, res) => {
  */
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}, '-__v').sort({ createdAt: -1 });
+    const users = await listUsers(1000);
 
     res.json(
       users.map((user) => ({
-        id: user._id,
+        id: user.id,
         firebaseUid: user.firebaseUid,
         email: user.email,
         name: user.name,
@@ -555,7 +586,7 @@ export const getAllUsers = async (req, res) => {
       }))
     );
   } catch (error) {
-    console.error('Get all users error:', error);
+    // ...existing code...
     res.status(500).json({ 
       message: 'Server error while getting users list!' 
     });
@@ -572,11 +603,12 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, avatarUrl, phone, address, gender, dateOfBirth, role, isPremium } = req.body;
 
-    const user = await User.findById(id);
+    // `id` is treated as firebaseUid in Firestore
+    const user = await findUserByFirebaseUid(id);
 
     if (!user) {
-      return res.status(404).json({ 
-        message: 'User not found!' 
+      return res.status(404).json({
+        message: 'User not found!'
       });
     }
 
@@ -618,26 +650,35 @@ export const updateUser = async (req, res) => {
     }
     if (isPremium !== undefined) user.isPremium = isPremium;
 
-    await user.save();
+    const updated = await updateUserByFirebaseUid(id, {
+      name: name !== undefined ? name : user.name,
+      avatarUrl: avatarUrl !== undefined ? avatarUrl : user.avatarUrl,
+      phone: phone !== undefined ? phone : user.phone,
+      address: address !== undefined ? address : user.address,
+      gender: gender !== undefined ? gender : user.gender,
+      dateOfBirth: dateOfBirth !== undefined ? dateOfBirth : user.dateOfBirth,
+      role: role !== undefined ? role : user.role,
+      isPremium: isPremium !== undefined ? isPremium : user.isPremium,
+    });
 
     res.json({
       message: 'User updated successfully!',
       user: {
-        id: user._id,
-        firebaseUid: user.firebaseUid,
-        email: user.email,
-        name: user.name,
-        avatarUrl: user.avatarUrl,
-        phone: user.phone || '',
-        address: user.address || '',
-        gender: user.gender || '',
-        dateOfBirth: user.dateOfBirth || null,
-        role: user.role,
-        isPremium: user.isPremium,
+        id: updated.id,
+        firebaseUid: updated.firebaseUid,
+        email: updated.email,
+        name: updated.name,
+        avatarUrl: updated.avatarUrl,
+        phone: updated.phone || '',
+        address: updated.address || '',
+        gender: updated.gender || '',
+        dateOfBirth: updated.dateOfBirth || null,
+        role: updated.role,
+        isPremium: updated.isPremium,
       },
     });
   } catch (error) {
-    console.error('Update user error:', error);
+    // ...existing code...
     res.status(500).json({ 
       message: 'Server error while updating user!' 
     });
@@ -652,37 +693,38 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-
+    // Treat `id` as firebaseUid
     // Don't allow deleting yourself
-    const currentUser = await User.findOne({ firebaseUid: req.user.firebaseUid });
-    if (currentUser._id.toString() === id) {
-      return res.status(400).json({ 
-        message: 'You cannot delete yourself!' 
+    const currentUser = await findUserByFirebaseUid(req.user.firebaseUid);
+    if (currentUser && currentUser.id === id) {
+      return res.status(400).json({
+        message: 'You cannot delete yourself!'
       });
     }
 
-    const user = await User.findByIdAndDelete(id);
-
+    const user = await findUserByFirebaseUid(id);
     if (!user) {
-      return res.status(404).json({ 
-        message: 'User not found!' 
+      return res.status(404).json({
+        message: 'User not found!'
       });
     }
 
-    // Delete user from Firebase Auth
+    // Delete user from Firestore
+    await deleteUserByFirebaseUid(id);
+
+    // Delete user from Firebase Auth (best-effort)
     try {
       await auth.deleteUser(user.firebaseUid);
-      console.log(`✅ Deleted Firebase user: ${user.firebaseUid}`);
+      // ...existing code...
     } catch (firebaseError) {
-      console.warn('⚠️ Failed to delete Firebase user:', firebaseError.message);
-      // Continue even if Firebase deletion fails
+      // ...existing code...
     }
 
-    res.json({ 
-      message: 'User deleted successfully!' 
+    res.json({
+      message: 'User deleted successfully!'
     });
   } catch (error) {
-    console.error('Delete user error:', error);
+    // ...existing code...
     res.status(500).json({ 
       message: 'Server error while deleting user!' 
     });
@@ -719,8 +761,8 @@ export const cleanupFirebaseUser = async (req, res) => {
       const userRecord = await auth.getUserByEmail(email);
       const firebaseUid = userRecord.uid;
 
-      // Check if user exists in MongoDB
-      const mongoUser = await User.findOne({ firebaseUid });
+      // Check if user exists in Firestore
+      const mongoUser = await findUserByFirebaseUid(firebaseUid);
 
       if (mongoUser) {
         // User exists in both, no cleanup needed
@@ -733,7 +775,7 @@ export const cleanupFirebaseUser = async (req, res) => {
 
       // User exists in Firebase but not in MongoDB - delete from Firebase
       await auth.deleteUser(firebaseUid);
-      console.log(`✅ Cleaned up Firebase user: ${email} (${firebaseUid})`);
+      // ...existing code...
 
       return res.json({
         success: true,
@@ -750,14 +792,14 @@ export const cleanupFirebaseUser = async (req, res) => {
         });
       }
 
-      console.error('Cleanup Firebase user error:', error);
+      // ...existing code...
       return res.status(500).json({
         success: false,
         message: 'Error cleaning up user in Firebase.',
       });
     }
   } catch (error) {
-    console.error('Cleanup Firebase user error:', error);
+    // ...existing code...
     res.status(500).json({
       success: false,
       message: 'Server error while cleaning up user!',

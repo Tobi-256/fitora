@@ -1,12 +1,22 @@
-import mongoose from "mongoose";
+import db from '../services/firestore.js';
 
-const cartItemSchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-    selectedSize: String,
+const col = db.collection('cartItems');
+
+function docToObj(doc) { return doc.exists ? { id: doc.id, ...doc.data() } : null; }
+
+export default {
+  async add(userId, productId, selectedSize) {
+    const ref = col.doc();
+    const payload = { userId, productId, selectedSize, createdAt: new Date() };
+    await ref.set(payload);
+    return docToObj(await ref.get());
   },
-  { timestamps: true }
-);
-
-export default mongoose.model("CartItem", cartItemSchema);
+  async listByUser(userId) {
+    const snap = await col.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async delete(id) {
+    await col.doc(id).delete();
+    return true;
+  }
+};

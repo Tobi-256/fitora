@@ -1,12 +1,11 @@
-import mongoose from "mongoose";
+// Deprecated Mongoose model placeholder.
+// Replaced by Firestore-based `analyticsService` in `be/src/services/analyticsService.js`.
+// This module keeps compatibility for any imports that expect a default export.
 
-const analyticsEventSchema = new mongoose.Schema(
-  {
-    eventType: String,
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-  },
-  { timestamps: true }
-);
+import * as analyticsService from '../services/analyticsService.js';
 
-export default mongoose.model("AnalyticsEvent", analyticsEventSchema);
+export default {
+  create: analyticsService.createEvent,
+  list: analyticsService.listEvents,
+  delete: analyticsService.deleteEvent,
+};

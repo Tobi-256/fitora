@@ -2,9 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
-import connectDB from "./src/config/db.js";
 import userRoutes from "./src/routes/userRoutes.js";
-import "./src/config/firebase.js"; // Initialize Firebase Admin SDK
+import admin from './src/config/firebase.js'; // Initialize Firebase Admin SDK
 
 dotenv.config();
 
@@ -12,7 +11,24 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Enable CORS for frontend
+// CORS configuration - allow frontend domain and localhost for development
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,12 +39,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 app.use('/api/uploads', express.static(join(__dirname, 'public', 'uploads')));
 
-// Connect DB
-connectDB();
+
+
+// Log all requests for debugging (before routes)
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.originalUrl || req.path}`);
+  next();
+});
 
 // Routes
 app.get("/", (req, res) => {
   res.send("Fitora API is running 🚀");
+});
+
+// Debug endpoint to inspect Firestore/emulator connection
+app.get('/api/debug/firestore', async (req, res) => {
+  try {
+    const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || null;
+    const projectId = (admin.app && admin.app().options && admin.app().options.projectId) || null;
+    let collections = [];
+    try {
+      const cols = await admin.firestore().listCollections();
+      collections = cols.map(c => c.id);
+    } catch (err) {
+      console.warn('Could not list collections:', err && err.message);
+    }
+
+    return res.json({
+      emulatorHost,
+      projectId,
+      collections,
+    });
+  } catch (error) {
+    console.error('Debug firestore error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+// Test route to verify routing works
+app.get("/api/test", (req, res) => {
+  res.json({ message: "API routing works!" });
 });
 
 app.use("/api", userRoutes);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, Space, Tag, Avatar, Descriptions, App, Upload, Select, DatePicker, Modal } from 'antd';
-import { UserOutlined, EditOutlined, CrownOutlined, UploadOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
-import type { UploadFile, UploadProps } from 'antd';
+import { UserOutlined, EditOutlined, CrownOutlined, UploadOutlined, PhoneOutlined } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
 import dayjs from 'dayjs';
 import { useAuth } from '../contexts/useAuth';
 import { updateProfile, uploadAvatar, checkPhone } from '../services/userService';
@@ -9,12 +9,37 @@ import { updateProfile, uploadAvatar, checkPhone } from '../services/userService
 const { Title } = Typography;
 
 export const Profile = () => {
-  const { userProfile, refreshUserProfile } = useAuth();
+  const { currentUser, userProfile, refreshUserProfile } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { message } = App.useApp();
+
+  // Check if user signed in with social provider (Google/Facebook)
+  // Only disable upload if user ONLY has social login (no password provider)
+  const isSocialLogin = () => {
+    if (!currentUser || !currentUser.providerData || currentUser.providerData.length === 0) {
+      return false;
+    }
+    const providers = currentUser.providerData.map(p => p.providerId);
+    // ...existing code...
+    
+    // Check if user has password provider - if yes, allow upload
+    // Firebase uses 'password' as providerId for email/password auth
+    const hasPasswordProvider = providers.includes('password');
+    if (hasPasswordProvider) {
+      // intentionally left blank
+      return false; // User can upload if they have password provider
+    }
+    
+    // Only disable if user ONLY has social providers (Google/Facebook)
+    const isSocialOnly = providers.includes('google.com') || providers.includes('facebook.com');
+    if (isSocialOnly) {
+      // ...existing code...
+    }
+    return isSocialOnly;
+  };
 
   const onFinish = async (values: { 
     name: string; 
@@ -22,21 +47,19 @@ export const Profile = () => {
     phone?: string;
     address?: string;
     gender?: 'male' | 'female' | 'other' | '';
-    dateOfBirth?: any;
+    dateOfBirth?: dayjs.Dayjs | null;
   }) => {
     setLoading(true);
     try {
       // Format dateOfBirth to ISO string if exists
-      const updateData: any = {
+      await updateProfile({
         name: values.name,
         avatarUrl: values.avatarUrl,
         phone: values.phone || '',
         address: values.address || '',
         gender: values.gender || '',
         dateOfBirth: values.dateOfBirth ? values.dateOfBirth.format('YYYY-MM-DD') : null,
-      };
-      
-      await updateProfile(updateData);
+      });
       await refreshUserProfile();
       message.success('Profile updated successfully!');
       setIsEditing(false);
@@ -71,16 +94,16 @@ export const Profile = () => {
   const handleAvatarUpload: UploadProps['customRequest'] = async ({ file, onSuccess, onError }) => {
     setUploading(true);
     try {
-      console.log('📤 Uploading avatar:', file);
-      const result = await uploadAvatar(file as File);
-      console.log('✅ Upload result:', result);
+      // ...existing code...
+        await uploadAvatar(file as File);
+      // ...existing code...
       await refreshUserProfile();
       message.success('Avatar uploaded successfully!');
       if (onSuccess) {
         onSuccess('ok');
       }
     } catch (error: unknown) {
-      console.error('❌ Upload error:', error);
+      // ...existing code...
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload avatar';
       message.error(errorMessage);
       if (onError) {
@@ -127,15 +150,23 @@ export const Profile = () => {
                 beforeUpload={beforeUpload}
                 showUploadList={false}
                 accept="image/*"
+                disabled={isSocialLogin()}
               >
                 <Button 
                   icon={<UploadOutlined />} 
                   loading={uploading}
                   size="small"
+                  disabled={isSocialLogin()}
+                  title={isSocialLogin() ? 'Avatar cannot be changed for social login accounts (Google/Facebook)' : 'Upload Avatar'}
                 >
                   Upload Avatar
                 </Button>
               </Upload>
+              {isSocialLogin() && (
+                <div style={{ fontSize: '12px', color: '#999', marginTop: '4px', textAlign: 'center' }}>
+                  Avatar managed by {currentUser?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Facebook'}
+                </div>
+              )}
             </Space>
             <Title level={2} style={{ marginTop: '16px', marginBottom: '8px' }}>
               {userProfile.name || 'User'}
@@ -221,7 +252,7 @@ export const Profile = () => {
                 label="Phone"
                 rules={[
                   {
-                    pattern: /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/,
+                    pattern: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
                     message: 'Please enter a valid phone number!',
                   },
                   {
@@ -241,7 +272,7 @@ export const Profile = () => {
                           return Promise.reject(new Error('This phone number is already in use!'));
                         }
                         return Promise.resolve();
-                      } catch (error) {
+                      } catch {
                         // If check fails, allow submission (backend will validate)
                         return Promise.resolve();
                       }

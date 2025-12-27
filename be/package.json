@@ -1,7 +1,7 @@
 {
-  "name": "be",
+  "name": "fitora-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Fitora Backend API",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -16,7 +16,6 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "firebase-admin": "^13.6.0",
-    "mongoose": "^9.0.1",
     "multer": "^2.0.2",
     "nodemailer": "^6.10.1"
   },
