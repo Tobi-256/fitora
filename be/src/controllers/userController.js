@@ -244,23 +244,50 @@ export const checkPhone = async (req, res) => {
  */
 export const syncUser = async (req, res) => {
   try {
-    const { firebaseUid, email, name, avatarUrl } = req.body;
+
+    const { firebaseUid, email, name, avatarUrl, providerId } = req.body;
+    console.log('[syncUser] Body:', req.body);
 
     if (!firebaseUid || !email) {
+      console.log('[syncUser] Missing firebaseUid or email');
       return res.status(400).json({ 
         message: 'firebaseUid and email are required!' 
       });
     }
 
-    // Create or update user in Firestore (doc id = firebaseUid)
-    const user = await createOrUpdateUser({
-      firebaseUid,
-      email,
-      name: name || '',
-      avatarUrl: avatarUrl || '',
-      role: 'user',
-      isPremium: false,
-    });
+    // Nếu đăng nhập bằng Facebook và chưa có avatarUrl, tự động lấy avatar Facebook
+    let finalAvatarUrl = avatarUrl;
+    if ((!avatarUrl || avatarUrl === '') && providerId === 'facebook.com') {
+      // Facebook avatar: https://graph.facebook.com/{firebaseUid}/picture?type=large
+      finalAvatarUrl = `https://graph.facebook.com/${firebaseUid}/picture?type=large`;
+    }
+
+    // Nếu đã có user với email này nhưng firebaseUid khác, cập nhật firebaseUid cho user cũ
+    let user = await findUserByEmail(email);
+    if (user && user.firebaseUid !== firebaseUid) {
+      // Cập nhật firebaseUid mới cho user cũ
+      await updateUserByFirebaseUid(user.firebaseUid, { firebaseUid });
+      // Sau đó dùng firebaseUid mới để update các thông tin khác (giữ nguyên thông tin cũ nếu đã có)
+      user = await createOrUpdateUser({
+        firebaseUid,
+        email,
+        name: name || user.name || '',
+        avatarUrl: finalAvatarUrl || user.avatarUrl || '',
+        role: user.role || 'user',
+        isPremium: user.isPremium || false,
+      });
+    } else {
+      // Nếu chưa có user hoặc firebaseUid đã đúng, tạo/cập nhật như bình thường
+      user = await createOrUpdateUser({
+        firebaseUid,
+        email,
+        name: name || '',
+        avatarUrl: finalAvatarUrl || '',
+        role: 'user',
+        isPremium: false,
+      });
+    }
+    console.log('[syncUser] Saved user:', user);
 
     res.status(user ? 200 : 201).json({
       message: 'Account synced successfully!',
@@ -275,21 +302,10 @@ export const syncUser = async (req, res) => {
       },
     });
   } catch (error) {
-    // ...existing code...
-
-    if (error.code === 11000) {
-      // Duplicate key error
-      const field = Object.keys(error.keyPattern)[0];
-      return res.status(400).json({ 
-        message: `${field} already exists in the system!` 
-      });
-    }
-
-    res.status(500).json({ 
-      message: 'Server error while syncing user!' 
-    });
+    console.error('[syncUser] Error:', error);
+    res.status(500).json({ message: 'Failed to sync user', error: error.message });
   }
-};
+}
 
 /**
  * GET /api/users/me

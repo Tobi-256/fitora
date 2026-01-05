@@ -29,18 +29,47 @@ export async function findUserByPhone(phone, excludeFirebaseUid = null) {
 export async function createOrUpdateUser(user) {
   if (!user || !user.firebaseUid) throw new Error('firebaseUid required');
   const ref = usersCol.doc(user.firebaseUid);
+  // Lấy user cũ nếu có
+  const oldSnap = await ref.get();
+  const oldData = oldSnap.exists ? oldSnap.data() : {};
+  // Chỉ cập nhật name nếu name cũ là rỗng, null, giống email trước @, hoặc giống displayName từ provider
+  let finalName = oldData.name;
+  const isDefaultName = (name, email, displayName) => {
+    if (!name || name === '') return true;
+    if (email && name === email.split('@')[0]) return true;
+    if (displayName && name === displayName) return true;
+    return false;
+  };
+  if (isDefaultName(finalName, user.email, user.displayName)) {
+    finalName = user.name || '';
+  }
+  // Avatar giữ logic cũ
+  let finalAvatarUrl = oldData.avatarUrl;
+  const isProviderAvatar = (url) => {
+    if (!url) return true;
+    return (
+      url.includes('googleusercontent') ||
+      url.includes('facebook.com') ||
+      url.includes('graph.facebook.com')
+    );
+  };
+  if (!finalAvatarUrl || finalAvatarUrl === '' || isProviderAvatar(finalAvatarUrl)) {
+    finalAvatarUrl = user.avatarUrl !== undefined && user.avatarUrl !== null && user.avatarUrl !== ''
+      ? user.avatarUrl
+      : (oldData.avatarUrl || '');
+  }
   await ref.set({
     firebaseUid: user.firebaseUid,
     email: user.email || '',
-    name: user.name || '',
-    avatarUrl: user.avatarUrl || '',
+    name: finalName,
+    avatarUrl: finalAvatarUrl,
     phone: user.phone || '',
     address: user.address || '',
     gender: user.gender || '',
     dateOfBirth: user.dateOfBirth || null,
     role: user.role || 'user',
     isPremium: !!user.isPremium,
-    createdAt: user.createdAt || new Date(),
+    createdAt: oldData.createdAt || user.createdAt || new Date(),
     updatedAt: new Date(),
   }, { merge: true });
 
