@@ -73,7 +73,7 @@ export const cleanupFirebaseUser = async (email: string): Promise<CleanupFirebas
 // Send OTP to email
 // type: 'registration' (default) | 'password-reset'
 export const sendOTP = async (email: string, type: 'registration' | 'password-reset' = 'registration'): Promise<OTPSendResponse> => {
-  const response = await api.post(`/otp/send?type=${type}`, { email });
+  const response = await api.post(`/otp/send?type=${type}`, { email }); // endpoint đã đúng, giữ nguyên dấu /
   return response.data;
 };
 

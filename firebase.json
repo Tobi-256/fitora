@@ -7,14 +7,15 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ],
-    "predeploy": [
-      "npm --prefix \"fe\" run build"
-    ]
+  {
+    "source": "/api/**",
+    "destination": "https://fitora-2jck.onrender.com/api/**"
+  },
+  {
+    "source": "**",
+    "destination": "/index.html"
+  }
+]
   },
   "emulators": {
     "auth": {
