@@ -10,6 +10,12 @@ export interface User {
   address?: string;
   gender?: 'male' | 'female' | 'other' | '';
   dateOfBirth?: string | null;
+  height?: number;
+  weight?: number;
+  shoulder?: number;
+  chest?: number;
+  waist?: number;
+  hip?: number;
   role: 'user' | 'admin';
   isPremium: boolean;
   createdAt?: string;
@@ -112,20 +118,26 @@ export const getProfile = async (): Promise<User> => {
 export const uploadAvatar = async (file: File): Promise<{ avatarUrl: string; user: User }> => {
   const formData = new FormData();
   formData.append('avatar', file);
-  
+
   // Don't set Content-Type header, let browser set it automatically with boundary
   const response = await api.post('/users/me/avatar', formData);
   return response.data;
 };
 
 // Update user profile
-export const updateProfile = async (data: { 
-  name?: string; 
+export const updateProfile = async (data: {
+  name?: string;
   avatarUrl?: string;
   phone?: string;
   address?: string;
   gender?: 'male' | 'female' | 'other' | '';
   dateOfBirth?: string | null;
+  height?: number;
+  weight?: number;
+  shoulder?: number;
+  chest?: number;
+  waist?: number;
+  hip?: number;
 }): Promise<User> => {
   const response = await api.put('/users/me', data);
   return response.data;

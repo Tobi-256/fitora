@@ -9,6 +9,7 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
 import { ForgotPassword } from './pages/ForgotPassword';
+import TryOn from './pages/TryOn';
 import './App.css';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/try-on" element={<ProtectedRoute><TryOn /></ProtectedRoute>} />
                   </Routes>
                 </main>
               </div>
