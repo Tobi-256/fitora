@@ -5,6 +5,7 @@ import multer from "multer";
 import userRoutes from "./src/routes/userRoutes.js";
 import admin from './src/config/firebase.js'; // Initialize Firebase Admin SDK
 
+
 dotenv.config();
 
 const app = express();
@@ -82,6 +83,7 @@ app.get("/api/test", (req, res) => {
 });
 
 app.use("/api", userRoutes);
+
 
 // 404 handler
 app.use((req, res) => {

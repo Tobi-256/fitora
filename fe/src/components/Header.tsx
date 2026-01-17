@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Button, Avatar, Space, Badge, Dropdown, Modal, Form, Input, App } from 'antd';
-import { UserOutlined, LogoutOutlined, CrownOutlined, ProfileOutlined, LockOutlined } from '@ant-design/icons';
+import { 
+  UserOutlined, 
+  LogoutOutlined, 
+  CrownOutlined, 
+  ProfileOutlined, 
+  LockOutlined, 
+  HeartOutlined 
+} from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
 import { passwordValidationRules } from '../utils/passwordValidation';
 import './Header.css';
@@ -63,13 +70,25 @@ export const Header = () => {
 
         <Space size="large" className="nav-menu">
           {currentUser ? (
+            // --- MENU KHI ĐÃ ĐĂNG NHẬP (CÓ HIỆN WISHLIST) ---
             <>
               <Link to="/">
                 <Button type="text" className="nav-link-btn">HOME</Button>
               </Link>
+              <Link to="/product"> 
+                <Button type="text" className="nav-link-btn">PRODUCT</Button>
+              </Link>
               <Link to="/try-on">
                 <Button type="text" className="nav-link-btn">TRY-ON</Button>
               </Link>
+
+              {/* Chỉ hiện Wishlist khi đã Login */}
+              <Link to="/wishlist">
+                <Button type="text" className="nav-link-btn">
+                  <HeartOutlined /> WISHLIST
+                </Button>
+              </Link>
+
               {userProfile?.isPremium && (
                 <Badge.Ribbon text="Premium" color="gold">
                   <CrownOutlined style={{ fontSize: '20px', color: '#ffd700' }} />
@@ -117,14 +136,14 @@ export const Header = () => {
                 placement="bottomRight"
                 trigger={['click']}
               >
-              <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
-                <Avatar
-                  src={userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/') 
-                    ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}` 
-                    : userProfile?.avatarUrl || undefined}
-                  icon={<UserOutlined />}
-                  size="default"
-                />
+                <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
+                  <Avatar
+                    src={userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/') 
+                      ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}` 
+                      : userProfile?.avatarUrl || undefined}
+                    icon={<UserOutlined />}
+                    size="default"
+                  />
                   <span className="user-name">
                     {userProfile?.name || userProfile?.email}
                   </span>
@@ -132,16 +151,24 @@ export const Header = () => {
               </Dropdown>
             </>
           ) : (
+            // --- MENU KHI CHƯA ĐĂNG NHẬP (KHÔNG CÓ WISHLIST) ---
             <>
-              <Link to="/login">
-                <Button type="text" className="nav-link-btn">LOGIN</Button>
-              </Link>
               <Link to="/">
                 <Button type="text" className="nav-link-btn">HOME</Button>
               </Link>
+
+              <Link to="/product"> 
+                <Button type="text" className="nav-link-btn">PRODUCT</Button>
+              </Link>
+              
               <Link to="/try-on">
                 <Button type="text" className="nav-link-btn">TRY-ON</Button>
               </Link>
+
+              <Link to="/login">
+                <Button type="text" className="nav-link-btn">LOGIN</Button>
+              </Link>
+
             </>
           )}
         </Space>

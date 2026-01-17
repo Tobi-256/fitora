@@ -9,7 +9,10 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
 import { ForgotPassword } from './pages/ForgotPassword';
+import ProductList from './pages/ProductList';
+import ProductDetail from './pages/ProductDetail';
 import './App.css';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   return (
@@ -31,6 +34,8 @@ function App() {
                 <main className="main-content">
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/product" element={<ProductList />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -42,6 +47,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/product/:id" element={<ProductDetail />} />
                   </Routes>
                 </main>
               </div>
