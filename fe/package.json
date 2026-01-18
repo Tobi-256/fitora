@@ -1,7 +1,7 @@
 {
-  "name": "fe",
+  "name": "fitora-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,10 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
+    "antd": "^6.1.1",
+    "axios": "^1.13.2",
+    "firebase": "^12.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.11.0",
     "three": "^0.182.0"
   },
   "devDependencies": {

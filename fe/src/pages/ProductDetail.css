@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- CẤU TRÚC CHUNG --- */
+.product-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  gap: 50px;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+/* --- CỘT TRÁI: GALLERY ẢNH --- */
+.gallery-section {
+  flex: 1.2;
+  display: flex;
+  gap: 20px;
+  max-height: 600px;
+}
+
+.thumbnail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.thumbnail-list::-webkit-scrollbar {
+  width: 4px;
+}
+.thumbnail-list::-webkit-scrollbar-thumb {
+  background-color: #eee;
+  border-radius: 4px;
+}
+
+.thumb-img {
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.thumb-img:hover, .thumb-img.active {
+  border-color: #333;
+  opacity: 1;
+}
+
+.main-image-wrapper {
+  flex: 1;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.main-image:hover {
+  transform: scale(1.05);
+}
+
+/* --- CỘT PHẢI: THÔNG TIN --- */
+.info-section {
+  flex: 1;
+  padding-top: 10px;
+}
+
+/* Header chỉ còn Brand */
+.product-header-row {
+  margin-bottom: 15px;
+}
+
+.brand-label {
+  font-size: 0.95rem;
+  color: #e08484;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Tiêu đề & Giá */
+.product-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  line-height: 1.2;
+  color: #222;
+}
+
+.product-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+  display: inline-block;
+  border-bottom: 3px solid #e08484;
+}
+
+/* --- CHỌN MÀU & SIZE --- */
+.option-group {
+  margin-bottom: 30px;
+}
+
+.option-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 12px;
+  display: block;
+  text-transform: uppercase;
+}
+
+.color-circle {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.color-circle:hover {
+  transform: scale(1.1);
+}
+
+.size-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.size-btn {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #ddd;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #555;
+}
+
+.size-btn:hover {
+  border-color: #333;
+  color: #000;
+}
+
+.size-btn.selected {
+  background-color: #333;
+  color: white;
+  border-color: #333;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* --- MÔ TẢ SẢN PHẨM --- */
+.description-section {
+  margin-top: 40px;
+  background-color: #fffbfb;
+  padding: 25px;
+  border-radius: 12px;
+  border-left: 4px solid #e08484;
+}
+
+.desc-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.description-section p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+}
+
+/* --- ACTION BUTTONS --- */
+.action-buttons {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* --- STYLE CHO NÚT WISHLIST (GIỮ NGUYÊN MÀU TRẮNG ĐEN) --- */
+.btn-wishlist {
+  width: 100%;
+  padding: 16px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600; /* Độ đậm vừa phải */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  /* Màu mặc định: Trắng viền Đen */
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #333; 
+  
+  border-radius: 4px; /* Bo góc nhẹ */
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+/* Chỉ đổi màu nhẹ khi di chuột vào (Hover) để người dùng biết là bấm được */
+.btn-wishlist:hover {
+  opacity: 0.8;
+  background-color: #f9f9f9;
+}
+
+/* Loading state */
+.btn-wishlist:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #999;
+}
+
+/* --- Các nút khác --- */
+.btn-try-on, .btn-shop {
+  width: 100%;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-try-on {
+  background-color: #e08484;
+  color: white;
+  box-shadow: 0 4px 15px rgba(224, 132, 132, 0.4);
+}
+
+.btn-try-on:hover {
+  background-color: #d66e6e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(224, 132, 132, 0.5);
+}
+
+.btn-shop {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-shop:hover {
+  background-color: #e0e0e0;
+  color: #000;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .product-detail-container {
+    flex-direction: column;
+    padding: 20px;
+    gap: 30px;
+  }
+
+  .gallery-section {
+    flex-direction: column-reverse;
+    max-height: none;
+  }
+
+  .thumbnail-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    width: 100%;
+  }
+
+  .thumb-img {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+  }
+
+  .main-image-wrapper {
+    height: 400px;
+  }
+
+  .product-title {
+    font-size: 1.8rem;
+  }
+}
