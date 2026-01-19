@@ -3,6 +3,11 @@
     "migrate:firestore": "node scripts/migrate-mongo-to-firestore.js"
   },
   "dependencies": {
-    "dayjs": "^1.11.19"
+    "@sendgrid/mail": "^8.1.6",
+    "dayjs": "^1.11.19",
+    "form-data": "^4.0.5",
+    "mailgun.js": "^12.5.0",
+    "nodemailer": "^7.0.12",
+    "resend": "^6.6.0"
   }
 }

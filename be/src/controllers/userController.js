@@ -62,7 +62,7 @@ export const resetPasswordAfterOTP = async (req, res) => {
     try {
       // Get user by email from Firebase
       const userRecord = await auth.getUserByEmail(email);
-      
+
       // Update password in Firebase
       await auth.updateUser(userRecord.uid, {
         password: newPassword,
@@ -79,14 +79,14 @@ export const resetPasswordAfterOTP = async (req, res) => {
       });
     } catch (firebaseError) {
       // ...existing code...
-      
+
       if (firebaseError.code === 'auth/user-not-found') {
         return res.status(404).json({
           success: false,
           message: 'User not found in the system!',
         });
       }
-      
+
       if (firebaseError.code === 'auth/weak-password') {
         return res.status(400).json({
           success: false,
@@ -141,7 +141,7 @@ export const checkEmail = async (req, res) => {
     try {
       // Check if email exists in Firebase Authentication
       const userRecord = await auth.getUserByEmail(email);
-      
+
       // Email exists
       return res.json({
         success: true,
@@ -158,7 +158,7 @@ export const checkEmail = async (req, res) => {
           message: 'Email is available.',
         });
       }
-      
+
       // Other Firebase errors
       // ...existing code...
       return res.status(500).json({
@@ -244,23 +244,50 @@ export const checkPhone = async (req, res) => {
  */
 export const syncUser = async (req, res) => {
   try {
-    const { firebaseUid, email, name, avatarUrl } = req.body;
+
+    const { firebaseUid, email, name, avatarUrl, providerId } = req.body;
+    console.log('[syncUser] Body:', req.body);
 
     if (!firebaseUid || !email) {
-      return res.status(400).json({ 
-        message: 'firebaseUid and email are required!' 
+      console.log('[syncUser] Missing firebaseUid or email');
+      return res.status(400).json({
+        message: 'firebaseUid and email are required!'
       });
     }
 
-    // Create or update user in Firestore (doc id = firebaseUid)
-    const user = await createOrUpdateUser({
-      firebaseUid,
-      email,
-      name: name || '',
-      avatarUrl: avatarUrl || '',
-      role: 'user',
-      isPremium: false,
-    });
+    // Nếu đăng nhập bằng Facebook và chưa có avatarUrl, tự động lấy avatar Facebook
+    let finalAvatarUrl = avatarUrl;
+    if ((!avatarUrl || avatarUrl === '') && providerId === 'facebook.com') {
+      // Facebook avatar: https://graph.facebook.com/{firebaseUid}/picture?type=large
+      finalAvatarUrl = `https://graph.facebook.com/${firebaseUid}/picture?type=large`;
+    }
+
+    // Nếu đã có user với email này nhưng firebaseUid khác, cập nhật firebaseUid cho user cũ
+    let user = await findUserByEmail(email);
+    if (user && user.firebaseUid !== firebaseUid) {
+      // Cập nhật firebaseUid mới cho user cũ
+      await updateUserByFirebaseUid(user.firebaseUid, { firebaseUid });
+      // Sau đó dùng firebaseUid mới để update các thông tin khác (giữ nguyên thông tin cũ nếu đã có)
+      user = await createOrUpdateUser({
+        firebaseUid,
+        email,
+        name: name || user.name || '',
+        avatarUrl: finalAvatarUrl || user.avatarUrl || '',
+        role: user.role || 'user',
+        isPremium: user.isPremium || false,
+      });
+    } else {
+      // Nếu chưa có user hoặc firebaseUid đã đúng, tạo/cập nhật như bình thường
+      user = await createOrUpdateUser({
+        firebaseUid,
+        email,
+        name: name || '',
+        avatarUrl: finalAvatarUrl || '',
+        role: 'user',
+        isPremium: false,
+      });
+    }
+    console.log('[syncUser] Saved user:', user);
 
     res.status(user ? 200 : 201).json({
       message: 'Account synced successfully!',
@@ -275,21 +302,10 @@ export const syncUser = async (req, res) => {
       },
     });
   } catch (error) {
-    // ...existing code...
-
-    if (error.code === 11000) {
-      // Duplicate key error
-      const field = Object.keys(error.keyPattern)[0];
-      return res.status(400).json({ 
-        message: `${field} already exists in the system!` 
-      });
-    }
-
-    res.status(500).json({ 
-      message: 'Server error while syncing user!' 
-    });
+    console.error('[syncUser] Error:', error);
+    res.status(500).json({ message: 'Failed to sync user', error: error.message });
   }
-};
+}
 
 /**
  * GET /api/users/me
@@ -316,6 +332,12 @@ export const getProfile = async (req, res) => {
       address: user.address || '',
       gender: user.gender || '',
       dateOfBirth: user.dateOfBirth || null,
+      height: user.height || null,
+      weight: user.weight || null,
+      shoulder: user.shoulder || null,
+      chest: user.chest || null,
+      waist: user.waist || null,
+      hip: user.hip || null,
       role: user.role,
       isPremium: user.isPremium,
       createdAt: user.createdAt,
@@ -323,8 +345,8 @@ export const getProfile = async (req, res) => {
     });
   } catch (error) {
     // ...existing code...
-    res.status(500).json({ 
-      message: 'Server error while getting user information!' 
+    res.status(500).json({
+      message: 'Server error while getting user information!'
     });
   }
 };
@@ -337,7 +359,7 @@ export const getProfile = async (req, res) => {
 export const uploadAvatar = async (req, res) => {
   try {
     // ...existing code...
-    
+
     if (!req.file) {
       // ...existing code...
       return res.status(400).json({
@@ -420,7 +442,7 @@ export const uploadAvatar = async (req, res) => {
     });
   } catch (error) {
     // ...existing code...
-    
+
     // Handle MongoDB duplicate key error (code 11000)
     if (error && error.code === 11000) {
       const duplicateField = Object.keys(error.keyPattern || {})[0];
@@ -428,17 +450,17 @@ export const uploadAvatar = async (req, res) => {
         message: `${duplicateField} already exists in the system!`,
       });
     }
-    
+
     // Handle validation errors
     if (error && error.name === 'ValidationError') {
       return res.status(400).json({
         message: 'Validation error: ' + (error.message || 'Invalid data'),
       });
     }
-    
+
     res.status(500).json({
       message: 'Server error while uploading avatar!',
-      error: process.env.NODE_ENV === 'development' 
+      error: process.env.NODE_ENV === 'development'
         ? (error instanceof Error ? error.message : String(error))
         : undefined,
     });
@@ -452,7 +474,7 @@ export const uploadAvatar = async (req, res) => {
  */
 export const updateProfile = async (req, res) => {
   try {
-    const { name, avatarUrl, phone, address, gender, dateOfBirth } = req.body;
+    const { name, avatarUrl, phone, address, gender, dateOfBirth, height, weight, shoulder, chest, waist, hip } = req.body;
     // Load user from Firestore
     const user = await findUserByFirebaseUid(req.user.firebaseUid);
 
@@ -501,6 +523,12 @@ export const updateProfile = async (req, res) => {
         updates.dateOfBirth = date;
       }
     }
+    if (height !== undefined) updates.height = Number(height);
+    if (weight !== undefined) updates.weight = Number(weight);
+    if (shoulder !== undefined) updates.shoulder = Number(shoulder);
+    if (chest !== undefined) updates.chest = Number(chest);
+    if (waist !== undefined) updates.waist = Number(waist);
+    if (hip !== undefined) updates.hip = Number(hip);
 
     // Apply updates to Firestore
     const updated = await updateUserByFirebaseUid(req.user.firebaseUid, updates);
@@ -517,22 +545,28 @@ export const updateProfile = async (req, res) => {
         address: updated.address || '',
         gender: updated.gender || '',
         dateOfBirth: updated.dateOfBirth || null,
+        height: updated.height || null,
+        weight: updated.weight || null,
+        shoulder: updated.shoulder || null,
+        chest: updated.chest || null,
+        waist: updated.waist || null,
+        hip: updated.hip || null,
         role: updated.role,
         isPremium: updated.isPremium,
       },
     });
   } catch (error) {
     // ...existing code...
-    
+
     // Handle duplicate phone number error
     if (error.code === 11000 && error.keyPattern?.phone) {
-      return res.status(400).json({ 
-        message: 'This phone number is already in use by another account!' 
+      return res.status(400).json({
+        message: 'This phone number is already in use by another account!'
       });
     }
-    
-    res.status(500).json({ 
-      message: 'Server error while updating information!' 
+
+    res.status(500).json({
+      message: 'Server error while updating information!'
     });
   }
 };
@@ -548,13 +582,13 @@ export const logout = async (req, res) => {
     // Frontend will delete token from localStorage
     // Can add logging here if needed
 
-    res.json({ 
-      message: 'Logged out successfully!' 
+    res.json({
+      message: 'Logged out successfully!'
     });
   } catch (error) {
     // ...existing code...
-    res.status(500).json({ 
-      message: 'Server error!' 
+    res.status(500).json({
+      message: 'Server error!'
     });
   }
 };
@@ -587,8 +621,8 @@ export const getAllUsers = async (req, res) => {
     );
   } catch (error) {
     // ...existing code...
-    res.status(500).json({ 
-      message: 'Server error while getting users list!' 
+    res.status(500).json({
+      message: 'Server error while getting users list!'
     });
   }
 };
@@ -621,8 +655,8 @@ export const updateUser = async (req, res) => {
       if (gender === '' || ['male', 'female', 'other'].includes(gender)) {
         user.gender = gender;
       } else {
-        return res.status(400).json({ 
-          message: 'Invalid gender value! Must be "male", "female", "other", or empty string.' 
+        return res.status(400).json({
+          message: 'Invalid gender value! Must be "male", "female", "other", or empty string.'
         });
       }
     }
@@ -632,8 +666,8 @@ export const updateUser = async (req, res) => {
       } else {
         const date = new Date(dateOfBirth);
         if (isNaN(date.getTime())) {
-          return res.status(400).json({ 
-            message: 'Invalid date format! Please use YYYY-MM-DD format.' 
+          return res.status(400).json({
+            message: 'Invalid date format! Please use YYYY-MM-DD format.'
           });
         }
         user.dateOfBirth = date;
@@ -643,8 +677,8 @@ export const updateUser = async (req, res) => {
       if (['user', 'admin'].includes(role)) {
         user.role = role;
       } else {
-        return res.status(400).json({ 
-          message: 'Invalid role! Must be "user" or "admin".' 
+        return res.status(400).json({
+          message: 'Invalid role! Must be "user" or "admin".'
         });
       }
     }
@@ -679,8 +713,8 @@ export const updateUser = async (req, res) => {
     });
   } catch (error) {
     // ...existing code...
-    res.status(500).json({ 
-      message: 'Server error while updating user!' 
+    res.status(500).json({
+      message: 'Server error while updating user!'
     });
   }
 };
@@ -725,8 +759,8 @@ export const deleteUser = async (req, res) => {
     });
   } catch (error) {
     // ...existing code...
-    res.status(500).json({ 
-      message: 'Server error while deleting user!' 
+    res.status(500).json({
+      message: 'Server error while deleting user!'
     });
   }
 };

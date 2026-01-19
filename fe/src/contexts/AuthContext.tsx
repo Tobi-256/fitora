@@ -14,6 +14,8 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  fetchSignInMethodsForEmail,
+  linkWithCredential,
 } from 'firebase/auth';
 import type { User as FirebaseUserType } from 'firebase/auth';
 import { auth } from '../config/firebase';
@@ -244,11 +246,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
-      } catch (popupError: unknown) {
+      } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
         console.error = originalError;
-        throw popupError;
+        // Account linking logic for Google
+        if (popupError.code === 'auth/account-exists-with-different-credential') {
+          const email = popupError.customData?.email;
+          const pendingCred = GoogleAuthProvider.credentialFromError?.(popupError);
+          if (!email) {
+            alert('Không lấy được email từ Google.');
+            throw popupError;
+          }
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.includes('facebook.com')) {
+            alert('Email này đã đăng ký bằng Facebook. Vui lòng đăng nhập Facebook trước để liên kết Google.');
+            // Đăng nhập Facebook
+            const facebookProvider = new FacebookAuthProvider();
+            try {
+              const fbResult = await signInWithPopup(auth, facebookProvider);
+              // Liên kết Google vào tài khoản Facebook hiện tại
+              if (pendingCred) {
+                await linkWithCredential(fbResult.user, pendingCred);
+                await syncUserToBackend(fbResult.user);
+                alert('Đã liên kết Google với tài khoản Facebook thành công!');
+              }
+            } catch (linkErr) {
+              const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
+              alert('Lỗi khi liên kết tài khoản: ' + errMsg);
+              throw linkErr;
+            }
+          } else if (methods.includes('password')) {
+            alert('Email này đã đăng ký bằng Email/Password. Vui lòng đăng nhập bằng Email trước để liên kết Google.');
+          } else {
+            alert('Email này đã đăng ký bằng phương thức khác: ' + methods.join(', '));
+          }
+        } else {
+          throw popupError;
+        }
       } finally {
         // Always restore console methods
         console.warn = originalWarn;
@@ -277,11 +312,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (errorCode === 'auth/popup-blocked' || errorMessage.includes('popup-blocked')) {
         throw new Error('Popup was blocked by browser. Please allow popups and try again.');
-      } else if (
-        errorCode === 'auth/account-exists-with-different-credential' ||
-        errorMessage.includes('account-exists-with-different-credential')
-      ) {
-        throw new Error('An account already exists with the same email address but different sign-in credentials.');
+      // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
       } else if (errorCode === 'auth/network-request-failed' || errorMessage.includes('network')) {
         throw new Error('Network error. Please check your connection and try again.');
       } else if (errorCode === 'auth/unauthorized-domain') {
@@ -329,11 +360,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
-      } catch (popupError: unknown) {
+      } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
         console.error = originalError;
-        throw popupError;
+        // Account linking logic for Facebook
+        if (popupError.code === 'auth/account-exists-with-different-credential') {
+          const email = popupError.customData?.email;
+          const pendingCred = FacebookAuthProvider.credentialFromError?.(popupError);
+          if (!email) {
+            alert('Không lấy được email từ Facebook.');
+            throw popupError;
+          }
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.includes('google.com')) {
+            alert('Email này đã đăng ký bằng Google. Vui lòng đăng nhập Google trước để liên kết Facebook.');
+            // Đăng nhập Google
+            const googleProvider = new GoogleAuthProvider();
+            try {
+              const googleResult = await signInWithPopup(auth, googleProvider);
+              // Liên kết Facebook vào tài khoản Google hiện tại
+              if (pendingCred) {
+                await linkWithCredential(googleResult.user, pendingCred);
+                await syncUserToBackend(googleResult.user);
+                alert('Đã liên kết Facebook với tài khoản Google thành công!');
+              }
+            } catch (linkErr) {
+              const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
+              alert('Lỗi khi liên kết tài khoản: ' + errMsg);
+              throw linkErr;
+            }
+          } else if (methods.includes('password')) {
+            alert('Email này đã đăng ký bằng Email/Password. Vui lòng đăng nhập bằng Email trước để liên kết Facebook.');
+          } else {
+            alert('Email này đã đăng ký bằng phương thức khác: ' + methods.join(', '));
+          }
+        } else {
+          throw popupError;
+        }
       } finally {
         // Always restore console methods
         console.warn = originalWarn;
@@ -362,11 +426,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (errorCode === 'auth/popup-blocked' || errorMessage.includes('popup-blocked')) {
         throw new Error('Popup was blocked by browser. Please allow popups and try again.');
-      } else if (
-        errorCode === 'auth/account-exists-with-different-credential' ||
-        errorMessage.includes('account-exists-with-different-credential')
-      ) {
-        throw new Error('An account already exists with the same email address but different sign-in credentials.');
+      // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
       } else if (errorCode === 'auth/network-request-failed' || errorMessage.includes('network')) {
         throw new Error('Network error. Please check your connection and try again.');
       } else if (errorCode === 'auth/unauthorized-domain') {

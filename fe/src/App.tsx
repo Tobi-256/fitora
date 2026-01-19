@@ -11,6 +11,9 @@ import { Profile } from './pages/Profile';
 import { ForgotPassword } from './pages/ForgotPassword';
 import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
+
+import TryOn from './pages/TryOn';
+
 import './App.css';
 import Wishlist from './pages/Wishlist';
 
@@ -48,6 +51,9 @@ function App() {
                       }
                     />
                     <Route path="/product/:id" element={<ProductDetail />} />
+
+                    <Route path="/try-on" element={<ProtectedRoute><TryOn /></ProtectedRoute>} />
+
                   </Routes>
                 </main>
               </div>
