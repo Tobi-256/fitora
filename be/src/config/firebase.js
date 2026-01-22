@@ -36,7 +36,7 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
   });
   console.log('[Firestore] Using emulator at', process.env.FIRESTORE_EMULATOR_HOST);
 }
-
+export const db = admin.firestore();
 export const auth = firebaseApp ? admin.auth() : null;
 export default admin;
 

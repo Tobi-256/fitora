@@ -17,6 +17,9 @@ import {
 import { sendOTP, verifyOTPCode } from '../controllers/otpController.js';
 import { verifyFirebaseToken, isAdmin } from '../middlewares/auth.js';
 import { uploadAvatar as uploadAvatarMiddleware } from '../utils/upload.js';
+import { getProductDetail, redirectPartner, getAllProducts /*seedProduucts*/ } from '../controllers/productController.js';
+import { addToWishlist, getWishlist, removeFromWishlist } from '../controllers/wishlistController.js';
+
 
 const router = express.Router();
 
@@ -61,5 +64,16 @@ router.get('/users', verifyFirebaseToken, isAdmin, getAllUsers);
 router.put('/users/:id', verifyFirebaseToken, isAdmin, updateUser);
 router.delete('/users/:id', verifyFirebaseToken, isAdmin, deleteUser);
 
+// Product Routes
+//router.get('/products/seed', seedProducts);
+router.get('/products', getAllProducts);               //xem cái list products
+router.get('/products/:id', getProductDetail);         // Xem chi tiết
+router.post('/products/redirect', redirectPartner);   // Redirect Partner  
+
+// --- WISHLIST ROUTES (SỬA LẠI CHỖ NÀY) ---
+// Thêm chữ '/wishlist' vào trước để khớp với frontend gọi /api/wishlist/add
+router.post('/wishlist/add', addToWishlist);              
+router.get('/wishlist/:userId', getWishlist);             
+router.delete('/wishlist/:wishlistId', removeFromWishlist);
 export default router;
 
