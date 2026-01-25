@@ -3,8 +3,6 @@ import type { ReactNode } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Center, Html, useProgress } from '@react-three/drei';
 import { OBJLoader } from 'three-stdlib';
-import * as THREE from 'three';
-
 // Custom Error Boundary for 3D Components
 interface ErrorBoundaryProps {
   fallback: ReactNode;
@@ -58,8 +56,6 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJ
 
   // Clone the object to avoid mutating the cached original directly
   const clonedObj = React.useMemo(() => obj.clone(), [obj]);
-  const meshRef = useRef<THREE.Group>(null);
-
   // Store original positions to avoid accumulation errors
   const originalPositionsRef = useRef<Map<string, Float32Array>>(new Map());
 
@@ -235,7 +231,7 @@ export default function Avatar3D({ height, weight, shoulder, chest, waist, hip }
           <Center top>
             <ModelErrorBoundary
               fallback={<FallbackModel height={height} shoulder={shoulder} />}
-              onError={(e) => setModelError(e.message || "Failed to load model")}
+              onError={(e: any) => setModelError(e.message || "Failed to load model")}
             >
               <HumanOBJModel
                 height={height}

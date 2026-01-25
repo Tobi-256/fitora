@@ -24,7 +24,7 @@ export const Profile = () => {
     }
     const providers = currentUser.providerData.map(p => p.providerId);
     // ...existing code...
-    
+
     // Check if user has password provider - if yes, allow upload
     // Firebase uses 'password' as providerId for email/password auth
     const hasPasswordProvider = providers.includes('password');
@@ -32,7 +32,7 @@ export const Profile = () => {
       // intentionally left blank
       return false; // User can upload if they have password provider
     }
-    
+
     // Only disable if user ONLY has social providers (Google/Facebook)
     const isSocialOnly = providers.includes('google.com') || providers.includes('facebook.com');
     if (isSocialOnly) {
@@ -41,8 +41,8 @@ export const Profile = () => {
     return isSocialOnly;
   };
 
-  const onFinish = async (values: { 
-    name: string; 
+  const onFinish = async (values: {
+    name: string;
     avatarUrl: string;
     phone?: string;
     address?: string;
@@ -95,7 +95,7 @@ export const Profile = () => {
     setUploading(true);
     try {
       // ...existing code...
-        await uploadAvatar(file as File);
+      await uploadAvatar(file as File);
       // ...existing code...
       await refreshUserProfile();
       message.success('Avatar uploaded successfully!');
@@ -138,11 +138,11 @@ export const Profile = () => {
         <Space orientation="vertical" size="large" style={{ width: '100%' }}>
           <div style={{ textAlign: 'center' }}>
             <Space direction="vertical" size="small">
-              <Avatar 
-                size={80} 
-                src={userProfile.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/') 
-                  ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}` 
-                  : userProfile.avatarUrl || undefined} 
+              <Avatar
+                size={80}
+                src={userProfile.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/')
+                  ? `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace('/api', '')}${userProfile.avatarUrl}`
+                  : userProfile.avatarUrl || undefined}
                 icon={<UserOutlined />}
               />
               <Upload
@@ -152,8 +152,8 @@ export const Profile = () => {
                 accept="image/*"
                 disabled={isSocialLogin()}
               >
-                <Button 
-                  icon={<UploadOutlined />} 
+                <Button
+                  icon={<UploadOutlined />}
                   loading={uploading}
                   size="small"
                   disabled={isSocialLogin()}
@@ -183,12 +183,12 @@ export const Profile = () => {
             </Space>
           </div>
 
-          <Card 
+          <Card
             title={
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Account Information</span>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   icon={<EditOutlined />}
                   onClick={handleEdit}
                 >
@@ -260,12 +260,12 @@ export const Profile = () => {
                       if (!value || value.trim() === '') {
                         return Promise.resolve();
                       }
-                      
+
                       // Check if phone is different from current phone
                       if (userProfile && value.trim() === userProfile.phone) {
                         return Promise.resolve();
                       }
-                      
+
                       try {
                         const result = await checkPhone(value.trim(), userProfile?.id);
                         if (result.exists) {
@@ -280,9 +280,9 @@ export const Profile = () => {
                   },
                 ]}
               >
-                <Input 
-                  prefix={<PhoneOutlined />} 
-                  placeholder="Enter phone number (e.g., +1234567890)" 
+                <Input
+                  prefix={<PhoneOutlined />}
+                  placeholder="Enter phone number (e.g., +1234567890)"
                   maxLength={20}
                 />
               </Form.Item>
@@ -291,8 +291,8 @@ export const Profile = () => {
                 name="address"
                 label="Address"
               >
-                <Input.TextArea 
-                  placeholder="Enter your address" 
+                <Input.TextArea
+                  placeholder="Enter your address"
                   rows={3}
                 />
               </Form.Item>
@@ -312,7 +312,7 @@ export const Profile = () => {
                 name="dateOfBirth"
                 label="Date of Birth"
               >
-                <DatePicker 
+                <DatePicker
                   style={{ width: '100%' }}
                   placeholder="Select date of birth"
                   format="DD/MM/YYYY"
@@ -335,9 +335,9 @@ export const Profile = () => {
                   <Button onClick={handleCancel}>
                     Cancel
                   </Button>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
+                  <Button
+                    type="primary"
+                    htmlType="submit"
                     loading={loading}
                     icon={<EditOutlined />}
                   >

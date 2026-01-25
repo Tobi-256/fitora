@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const items = [
     { src: '/items/item1.jpg', alt: 'Shirt', id: 1 },

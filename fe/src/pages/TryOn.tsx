@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Avatar3D from '../components/Avatar3D';
 import Sidebar from '../components/Sidebar';
 import ItemList from '../components/ItemList';
