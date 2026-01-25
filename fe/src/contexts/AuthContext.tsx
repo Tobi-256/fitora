@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
         
         await syncUserToBackend(userCredential.user);
+        return userCredential; // ✅ Đã thêm return
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             await syncUserToBackend(loginCredential.user);
             
-            return;
+            return loginCredential; // ✅ Đã thêm return
           } catch (loginError: unknown) {
             if (loginError instanceof Error && loginError.message.includes('wrong-password')) {
               throw new Error('This email is already in use with a different password. Please login or use a different email.');
@@ -140,6 +141,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await syncUserToBackend(userCredential.user);
+      return userCredential; // ✅ Đã thêm return để Login.tsx nhận được data
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.message.includes('configuration-not-found') || error.message.includes('auth/configuration-not-found')) {
@@ -246,6 +248,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
+        return result; // ✅ Đã thêm return quan trọng ở đây
       } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
@@ -270,6 +273,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 await linkWithCredential(fbResult.user, pendingCred);
                 await syncUserToBackend(fbResult.user);
                 alert('Đã liên kết Google với tài khoản Facebook thành công!');
+                return fbResult; // ✅ Đã thêm return cho trường hợp liên kết
               }
             } catch (linkErr) {
               const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
@@ -360,6 +364,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
+        return result; // ✅ Đã thêm return quan trọng ở đây
       } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
@@ -384,6 +389,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 await linkWithCredential(googleResult.user, pendingCred);
                 await syncUserToBackend(googleResult.user);
                 alert('Đã liên kết Facebook với tài khoản Google thành công!');
+                return googleResult; // ✅ Đã thêm return cho trường hợp liên kết
               }
             } catch (linkErr) {
               const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
@@ -532,4 +538,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

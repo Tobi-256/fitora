@@ -6,11 +6,14 @@ export interface AuthContextType {
   currentUser: FirebaseUserType | null;
   userProfile: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  
+  // 👇 CẬP NHẬT CÁC DÒNG NÀY THÀNH Promise<any> 👇
+  login: (email: string, password: string) => Promise<any>;
+  register: (email: string, password: string, name: string) => Promise<any>;
+  loginWithGoogle: () => Promise<any>;
+  loginWithFacebook: () => Promise<any>;
+  
   logout: () => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-  loginWithFacebook: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message: string; otp?: string }>;
   verifyOTPAndResetPassword: (email: string, otp: string) => Promise<void>;
   sendEmailVerification: () => Promise<void>;
