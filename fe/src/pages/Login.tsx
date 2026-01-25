@@ -6,10 +6,6 @@ import { useAuth } from '../contexts/useAuth';
 import axios from 'axios';
 import './Login.css';
 
-// 👇 1. Thêm import signOut và auth để xử lý đăng xuất Admin
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebase';
-
 const { Title } = Typography;
 
 // Địa chỉ Backend
@@ -18,7 +14,10 @@ const API_URL = 'http://localhost:5000';
 export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null);
-  const { login, loginWithGoogle, loginWithFacebook } = useAuth();
+  
+  // 👇 1. Lấy thêm hàm logout từ useAuth
+  const { login, loginWithGoogle, loginWithFacebook, logout } = useAuth();
+  
   const navigate = useNavigate();
   const { message } = App.useApp();
 
@@ -50,16 +49,17 @@ export const Login = () => {
 
       if (userData) {
         
-        // ⛔️⛔️ LOGIC CHẶN ADMIN (QUAN TRỌNG NHẤT) ⛔️⛔️
+        // ⛔️⛔️ LOGIC CHẶN ADMIN ⛔️⛔️
         if (userData.role === 'admin') {
              message.warning('Tài khoản Admin vui lòng đăng nhập ở cổng Quản trị riêng!');
              
-             // Đăng xuất ngay lập tức để không lưu session admin ở trang user
-             await signOut(auth);
+             // 👇 2. Dùng hàm logout của Context thay vì signOut(auth) trực tiếp
+             // Hàm này sẽ lo việc gọi firebase signOut và xóa localStorage
+             await logout();
              
              // Chuyển hướng sang trang Admin Login
              navigate('/admin/login');
-             return; // Dừng code tại đây
+             return; 
         }
 
         // Nếu là User thường -> Cho vào trang chủ
@@ -75,7 +75,7 @@ export const Login = () => {
       const serverMsg = error.response?.data?.message;
       message.warning(serverMsg || 'Đăng nhập thành công, nhưng đồng bộ dữ liệu gặp lỗi.');
       
-      // Nếu lỗi server nhưng Firebase đã login, vẫn cho vào trang chủ (nhưng chỉ user thường)
+      // Nếu lỗi server nhưng Firebase đã login, vẫn cho vào trang chủ
       navigate('/');
     }
   };
