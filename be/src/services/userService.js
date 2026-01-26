@@ -128,17 +128,25 @@ export async function getUserStats() {
   const premiumUsersSnap = await usersCol.where('isPremium', '==', true).get();
   const premiumUsers = premiumUsersSnap.size;
 
+  // Calculate total admins
+  const adminsSnap = await usersCol.where('role', '==', 'admin').get();
+  const totalAdmins = adminsSnap.size;
+
   // Get recent signups (last 30 days)
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const recentUsersSnap = await usersCol.where('createdAt', '>=', thirtyDaysAgo).get();
-  const newUsersLast30Days = recentUsersSnap.size;
+  const newUsers = recentUsersSnap.size;
+
+  const premiumRate = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : 0;
 
   return {
     totalUsers,
     premiumUsers,
-    newUsersLast30Days,
-    averageEngagement: 0 // Placeholder or calculate from other collections if needed
+    newUsers,
+    totalAdmins,
+    premiumRate,
+    averageEngagement: 0
   };
 }
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   Layout, Menu, Card, Row, Col, Statistic, Table,
   Avatar, Tag, Button, Typography, Spin, message
