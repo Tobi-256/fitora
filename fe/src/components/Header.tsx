@@ -65,6 +65,7 @@ export const Header = () => {
     <AntHeader className="app-header">
       <div className="header-container">
         <Link to="/" className="logo">
+          {/* <img src="/logo.jpg" alt="Fitora Logo" className="logo-img" /> */}
           <h1>FITORA</h1>
         </Link>
 

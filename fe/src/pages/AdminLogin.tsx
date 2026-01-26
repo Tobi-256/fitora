@@ -4,7 +4,7 @@ import { Form, Input, Button, Card, Typography, message, Layout } from 'antd';
 import { LockOutlined, UserOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase'; // Đảm bảo đường dẫn đúng đến file firebase config
-import axios from 'axios';
+
 import './AdminLogin.css';
 
 const { Title, Text } = Typography;
@@ -35,12 +35,22 @@ const AdminLogin = () => {
       const token = await user.getIdToken();
 
       // 3. Gọi API kiểm tra xem user này có phải là 'admin' trong Database không
-      // Lưu ý: User phải có role="admin" trong Firestore (đã sửa ở bước trước)
-      const res = await axios.get(`${API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${API_URL}/api/users/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      if (res.data && res.data.role === 'admin') {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      const resData = await response.json();
+
+      if (resData && resData.role === 'admin') {
         message.success('Chào mừng quản trị viên quay lại!');
         navigate('/admin/dashboard');
       } else {
@@ -57,9 +67,8 @@ const AdminLogin = () => {
       } else if (error.code === 'auth/too-many-requests') {
         message.error('Đăng nhập sai quá nhiều lần. Vui lòng thử lại sau.');
       } else {
-        // Hiển thị lỗi từ backend (nếu có) hoặc lỗi chung
-        const serverMsg = error.response?.data?.message;
-        message.error(serverMsg || error.message || 'Đăng nhập thất bại.');
+        // Hiển thị lỗi chung
+        message.error(error.message || 'Đăng nhập thất bại.');
       }
     } finally {
       setLoading(false);

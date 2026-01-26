@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, Space, Divider, App } from 'antd';
 import { LockOutlined, MailOutlined, FacebookFilled, GoogleOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
-import axios from 'axios';
+
 import './Login.css';
 
 const { Title } = Typography;
@@ -30,22 +30,30 @@ export const Login = () => {
       const token = await user.getIdToken();
 
       // Gọi API Sync
-      const res = await axios.post(
-        `${API_URL}/api/users/sync`,
-        {
+      const response = await fetch(`${API_URL}/api/users/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
           firebaseUid: user.uid,
           email: user.email,
           name: user.displayName || user.email?.split('@')[0],
           avatarUrl: user.photoURL || '',
           providerId: user.providerData?.[0]?.providerId || 'password',
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      const resData = await response.json();
 
       // Lấy data user từ phản hồi của Backend
-      const userData = res.data?.user;
+      const userData = resData?.user;
 
       if (userData) {
 
@@ -72,8 +80,7 @@ export const Login = () => {
 
     } catch (error: any) {
       console.error("Post-login error:", error);
-      const serverMsg = error.response?.data?.message;
-      message.warning(serverMsg || 'Đăng nhập thành công, nhưng đồng bộ dữ liệu gặp lỗi.');
+      message.warning(error.message || 'Đăng nhập thành công, nhưng đồng bộ dữ liệu gặp lỗi.');
 
       // Nếu lỗi server nhưng Firebase đã login, vẫn cho vào trang chủ
       navigate('/');
