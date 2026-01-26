@@ -92,9 +92,54 @@ export async function updateUserByFirebaseUid(firebaseUid, updates) {
   return { id: snap.id, ...snap.data() };
 }
 
-export async function listUsers(limit = 100) {
-  const q = await usersCol.orderBy('createdAt', 'desc').limit(limit).get();
-  return q.docs.map(d => ({ id: d.id, ...d.data() }));
+export async function listUsers(limit = 10, lastId = null, search = '') {
+  let query = usersCol.orderBy('createdAt', 'desc');
+
+  if (search) {
+    // Basic search simulation in Firestore (prefix match)
+    // Note: Firestore doesn't support full-text search natively without third-party services.
+    // This will search for names starting with the search string.
+    query = query.where('name', '>=', search).where('name', '<=', search + '\uf8ff');
+  }
+
+  if (lastId) {
+    const lastDoc = await usersCol.doc(lastId).get();
+    if (lastDoc.exists) {
+      query = query.startAfter(lastDoc);
+    }
+  }
+
+  const snap = await query.limit(limit).get();
+  const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  const lastVisible = snap.docs[snap.docs.length - 1];
+
+  return {
+    users,
+    lastId: lastVisible ? lastVisible.id : null
+  };
+}
+
+export async function getUserStats() {
+  const allUsersSnap = await usersCol.get();
+  const totalUsers = allUsersSnap.size;
+
+  // Calculate premium users
+  const premiumUsersSnap = await usersCol.where('isPremium', '==', true).get();
+  const premiumUsers = premiumUsersSnap.size;
+
+  // Get recent signups (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentUsersSnap = await usersCol.where('createdAt', '>=', thirtyDaysAgo).get();
+  const newUsersLast30Days = recentUsersSnap.size;
+
+  return {
+    totalUsers,
+    premiumUsers,
+    newUsersLast30Days,
+    averageEngagement: 0 // Placeholder or calculate from other collections if needed
+  };
 }
 
 export async function deleteUserByFirebaseUid(firebaseUid) {
