@@ -139,7 +139,7 @@ export const Header = () => {
                 <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
                   <Avatar
                     src={userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/')
-                      ? `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api').replace('/api', '')}${userProfile.avatarUrl}`
+                      ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}`
                       : userProfile?.avatarUrl || undefined}
                     icon={<UserOutlined />}
                     size="default"

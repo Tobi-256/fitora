@@ -11,14 +11,12 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { auth } from '../config/firebase';
+import api from '../services/api';
 import { signOut } from 'firebase/auth';
 import './Dashboard.css';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
-
-// URL Backend
-const API_URL = import.meta.env.VITE_API_BASE_URL.replace('/api', '');
 
 // --- 1. ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
 interface DashboardStats {
@@ -55,16 +53,8 @@ const Dashboard = () => {
   // --- 3. HÀM LẤY DỮ LIỆU ---
   const fetchDashboardData = async () => {
     try {
-      // FIX LỖI: Thêm dấu ?
-      const user = auth?.currentUser;
-
-      if (!user) return;
-
-      const token = await user.getIdToken();
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      const statsRes = await axios.get(`${API_URL}/api/users/stats`, config);
-      const usersRes = await axios.get(`${API_URL}/api/users?limit=10`, config);
+      const statsRes = await api.get('/users/stats');
+      const usersRes = await api.get('/users?limit=10');
 
       if (statsRes.data.success) {
         setStats(statsRes.data.data);
@@ -82,7 +72,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // FIX LỖI: Thêm dấu ?
       if (auth?.currentUser) {
         fetchDashboardData();
       } else {
@@ -95,9 +84,9 @@ const Dashboard = () => {
   // --- 4. HÀM ĐĂNG XUẤT ---
   const handleLogout = async () => {
     try {
-      // FIX LỖI: Kiểm tra auth tồn tại trước khi sign out
       if (auth) {
         await signOut(auth);
+        localStorage.removeItem('firebaseToken');
         message.success("Đã đăng xuất!");
         navigate('/login');
       }

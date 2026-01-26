@@ -3,15 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message, Layout } from 'antd';
 import { LockOutlined, UserOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth } from '../config/firebase'; // Đảm bảo đường dẫn đúng đến file firebase config
-import axios from 'axios';
+import { auth } from '../config/firebase';
+import api from '../services/api';
 import './AdminLogin.css';
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
-
-// URL Backend
-const API_URL = import.meta.env.VITE_API_BASE_URL.replace('/api', '');
 
 const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
@@ -20,7 +17,6 @@ const AdminLogin = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
 
-    // Kiểm tra an toàn: Đảm bảo Firebase Auth đã sẵn sàng
     if (!auth) {
       message.error("Lỗi hệ thống: Firebase Auth chưa được khởi tạo.");
       setLoading(false);
@@ -28,28 +24,23 @@ const AdminLogin = () => {
     }
 
     try {
-      // 1. Đăng nhập vào Firebase (Dùng auth!)
       const userCredential = await signInWithEmailAndPassword(auth!, values.email, values.password);
       const user = userCredential.user;
-
-      // 2. Lấy Token xác thực để gửi xuống Backend
       const token = await user.getIdToken();
 
-      // 3. Gọi API kiểm tra xem user này có phải là 'admin' trong Database không
-      // Lưu ý: User phải có role="admin" trong Firestore (đã sửa ở bước trước)
-      const res = await axios.get(`${API_URL}/api/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Lưu token vào localStorage để axios interceptor có thể sử dụng
+      localStorage.setItem('firebaseToken', token);
+
+      const res = await api.get('/users/me');
 
       if (res.data && res.data.role === 'admin') {
         message.success('Chào mừng quản trị viên quay lại!');
         navigate('/admin/dashboard');
       } else {
-        // ⛔️ Nếu đăng nhập đúng mật khẩu nhưng Role là 'user' -> Đuổi ra ngay
         await signOut(auth!);
+        localStorage.removeItem('firebaseToken');
         message.error('Tài khoản này không có quyền truy cập trang Quản trị!');
       }
-
     } catch (error: any) {
       console.error("Lỗi đăng nhập Admin:", error);
 
