@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   signInWithEmailAndPassword,
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || '';
         const avatarUrl = firebaseUser.photoURL || '';
-        
+
         await syncUser({
           firebaseUid: firebaseUser.uid,
           email: firebaseUser.email || '',
@@ -83,18 +83,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!auth) {
       throw new Error('Firebase auth is not initialized. Please check Firebase configuration and ensure Authentication is enabled in Firebase Console.');
     }
-    
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await updateFirebaseProfile(userCredential.user, { displayName: name });
-        
+
         try {
           await sendEmailVerification(userCredential.user);
         } catch (verificationError) {
         }
-        
+
         await syncUserToBackend(userCredential.user);
+        return userCredential; // ✅ Đã thêm return
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -102,17 +103,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           throw new Error('Firebase Authentication is not configured. Please enable Email/Password in Firebase Console → Authentication → Sign-in method.');
         }
         if (error.message.includes('email-already-in-use')) {
-          
+
           try {
             const loginCredential = await signInWithEmailAndPassword(auth, email, password);
-            
+
             if (loginCredential.user && name) {
               await updateFirebaseProfile(loginCredential.user, { displayName: name });
             }
-            
+
             await syncUserToBackend(loginCredential.user);
-            
-            return;
+
+            return loginCredential; // ✅ Đã thêm return
           } catch (loginError: unknown) {
             if (loginError instanceof Error && loginError.message.includes('wrong-password')) {
               throw new Error('This email is already in use with a different password. Please login or use a different email.');
@@ -136,10 +137,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!auth) {
       throw new Error('Firebase auth is not initialized. Please check Firebase configuration and ensure Authentication is enabled in Firebase Console.');
     }
-    
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await syncUserToBackend(userCredential.user);
+      return userCredential; // ✅ Đã thêm return để Login.tsx nhận được data
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.message.includes('configuration-not-found') || error.message.includes('auth/configuration-not-found')) {
@@ -171,33 +173,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const resetPassword = async (email: string) => {
     if (!auth) throw new Error('Firebase auth not initialized');
-    
+
     try {
       const { sendOTP } = await import('../services/userService');
       const otpResponse = await sendOTP(email, 'password-reset');
-      
+
       if (!otpResponse.success) {
         return { success: false, message: otpResponse.message || 'Unable to send OTP. Please try again.' };
       }
-      
+
       return { success: true, message: otpResponse.message, otp: otpResponse.otp };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error sending OTP for password reset.';
       return { success: false, message: errorMessage };
     }
   };
-  
+
   const verifyOTPAndResetPassword = async (email: string, otp: string) => {
     if (!auth) throw new Error('Firebase auth not initialized');
-    
+
     try {
       const { verifyOTP } = await import('../services/userService');
       const verifyResponse = await verifyOTP(email, otp);
-      
+
       if (!verifyResponse.success) {
         throw new Error(verifyResponse.message || 'Invalid OTP.');
       }
-      
+
       await sendPasswordResetEmail(auth, email);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -219,10 +221,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const provider = new GoogleAuthProvider();
-      
+
       const originalWarn = console.warn;
       const originalError = console.error;
-      
+
       console.warn = (...args: unknown[]) => {
         const message = args[0]?.toString() || '';
         if (message.includes('Cross-Origin-Opener-Policy') || message.includes('window.closed')) {
@@ -246,6 +248,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
+        return result; // ✅ Đã thêm return quan trọng ở đây
       } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
@@ -270,6 +273,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 await linkWithCredential(fbResult.user, pendingCred);
                 await syncUserToBackend(fbResult.user);
                 alert('Đã liên kết Google với tài khoản Facebook thành công!');
+                return fbResult; // ✅ Đã thêm return cho trường hợp liên kết
               }
             } catch (linkErr) {
               const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
@@ -293,7 +297,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const firebaseError = error as FirebaseError;
       const errorCode = firebaseError?.code || '';
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       if (
         errorCode === 'auth/popup-closed-by-user' ||
         errorCode === 'auth/user-cancelled' ||
@@ -312,7 +316,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (errorCode === 'auth/popup-blocked' || errorMessage.includes('popup-blocked')) {
         throw new Error('Popup was blocked by browser. Please allow popups and try again.');
-      // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
+        // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
       } else if (errorCode === 'auth/network-request-failed' || errorMessage.includes('network')) {
         throw new Error('Network error. Please check your connection and try again.');
       } else if (errorCode === 'auth/unauthorized-domain') {
@@ -333,10 +337,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const provider = new FacebookAuthProvider();
       provider.addScope('email');
       provider.addScope('public_profile');
-      
+
       const originalWarn = console.warn;
       const originalError = console.error;
-      
+
       console.warn = (...args: unknown[]) => {
         const message = args[0]?.toString() || '';
         if (message.includes('Cross-Origin-Opener-Policy') || message.includes('window.closed')) {
@@ -360,6 +364,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const result = await signInWithPopup(auth, provider);
         await syncUserToBackend(result.user);
+        return result; // ✅ Đã thêm return quan trọng ở đây
       } catch (popupError: any) {
         // Restore console methods before checking error
         console.warn = originalWarn;
@@ -384,6 +389,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 await linkWithCredential(googleResult.user, pendingCred);
                 await syncUserToBackend(googleResult.user);
                 alert('Đã liên kết Facebook với tài khoản Google thành công!');
+                return googleResult; // ✅ Đã thêm return cho trường hợp liên kết
               }
             } catch (linkErr) {
               const errMsg = linkErr instanceof Error ? linkErr.message : String(linkErr);
@@ -407,7 +413,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const firebaseError = error as FirebaseError;
       const errorCode = firebaseError?.code || '';
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       if (
         errorCode === 'auth/popup-closed-by-user' ||
         errorCode === 'auth/user-cancelled' ||
@@ -426,7 +432,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (errorCode === 'auth/popup-blocked' || errorMessage.includes('popup-blocked')) {
         throw new Error('Popup was blocked by browser. Please allow popups and try again.');
-      // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
+        // Đã xử lý account linking ở trên, không cần throw lỗi này nữa
       } else if (errorCode === 'auth/network-request-failed' || errorMessage.includes('network')) {
         throw new Error('Network error. Please check your connection and try again.');
       } else if (errorCode === 'auth/unauthorized-domain') {
@@ -532,4 +538,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

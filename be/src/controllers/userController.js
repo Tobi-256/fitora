@@ -7,9 +7,8 @@ import {
   updateUserByFirebaseUid,
   listUsers,
   deleteUserByFirebaseUid,
-  getUserStats,
+  getUserStats, // <--- QUAN TRỌNG: Đã thêm import này
 } from '../services/userService.js';
-import { uploadToFirebase } from '../utils/firebaseStorage.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -323,10 +322,15 @@ export const uploadAvatar = async (req, res) => {
       }
     }
 
-    // Upload to Firebase Storage
-    const avatarUrl = await uploadToFirebase(req.file.buffer, req.file.originalname, 'avatars');
+    if (user && user.avatarUrl && (user.avatarUrl.includes('/uploads/avatars/') || user.avatarUrl.includes('/api/uploads/avatars/'))) {
+      const filePath = user.avatarUrl.replace('/api', '');
+      const oldAvatarPath = path.join(__dirname, '../../public', filePath);
+      try {
+        if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath);
+      } catch (err) { }
+    }
 
-    // Update user record with the new Firebase URL
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
     await updateUserByFirebaseUid(req.user.firebaseUid, { avatarUrl });
     user = await findUserByFirebaseUid(req.user.firebaseUid);
 
@@ -482,11 +486,6 @@ export const updateUser = async (req, res) => {
         firebaseUid: updated.firebaseUid,
         email: updated.email,
         name: updated.name,
-        avatarUrl: updated.avatarUrl,
-        phone: updated.phone || '',
-        address: updated.address || '',
-        gender: updated.gender || '',
-        dateOfBirth: updated.dateOfBirth || null,
         role: updated.role,
         isPremium: updated.isPremium,
       },

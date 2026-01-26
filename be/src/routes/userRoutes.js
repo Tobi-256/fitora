@@ -13,16 +13,17 @@ import {
   updateUser,
   deleteUser,
   resetPasswordAfterOTP,
+  getAdminStats, // <--- 1. THÊM IMPORT NÀY
 } from '../controllers/userController.js';
 import { sendOTP, verifyOTPCode } from '../controllers/otpController.js';
 import { verifyFirebaseToken, isAdmin } from '../middlewares/auth.js';
 import { uploadAvatar as uploadAvatarMiddleware } from '../utils/upload.js';
-import { getProductDetail, redirectPartner, getAllProducts /*seedProduucts*/ } from '../controllers/productController.js';
+import { getProductDetail, redirectPartner, getAllProducts } from '../controllers/productController.js';
 import { addToWishlist, getWishlist, removeFromWishlist } from '../controllers/wishlistController.js';
-
 
 const router = express.Router();
 
+// --- PUBLIC USER ROUTES ---
 router.post('/users/check-email', checkEmail);
 router.post('/users/check-phone', checkPhone);
 router.post('/users/cleanup-firebase', cleanupFirebaseUser);
@@ -31,7 +32,10 @@ router.post('/otp/send', sendOTP);
 router.post('/otp/verify', verifyOTPCode);
 router.post('/users/sync', syncUser);
 
+// --- PROTECTED USER ROUTES (PROFILE) ---
 router.get('/users/me', verifyFirebaseToken, getProfile);
+
+// Avatar Upload with Multer Error Handling
 router.post('/users/me/avatar', verifyFirebaseToken, (req, res, next) => {
   uploadAvatarMiddleware(req, res, (err) => {
     if (err) {
@@ -57,23 +61,30 @@ router.post('/users/me/avatar', verifyFirebaseToken, (req, res, next) => {
     next();
   });
 }, uploadAvatar);
+
 router.put('/users/me', verifyFirebaseToken, updateProfile);
 router.post('/users/logout', verifyFirebaseToken, logout);
 
+// --- ADMIN ROUTES (QUAN TRỌNG) ---
+
+// 1. Thống kê Dashboard (Phải đặt TRƯỚC route /users/:id để không bị nhầm lẫn)
+router.get('/users/stats', verifyFirebaseToken, isAdmin, getAdminStats);
+
+// 2. Quản lý danh sách User
 router.get('/users', verifyFirebaseToken, isAdmin, getAllUsers);
 router.put('/users/:id', verifyFirebaseToken, isAdmin, updateUser);
 router.delete('/users/:id', verifyFirebaseToken, isAdmin, deleteUser);
 
-// Product Routes
-//router.get('/products/seed', seedProducts);
-router.get('/products', getAllProducts);               //xem cái list products
+
+// --- PRODUCT ROUTES ---
+// router.get('/products/seed', seedProducts);
+router.get('/products', getAllProducts);               // Xem list products
 router.get('/products/:id', getProductDetail);         // Xem chi tiết
-router.post('/products/redirect', redirectPartner);   // Redirect Partner  
+router.post('/products/redirect', redirectPartner);    // Redirect Partner  
 
-// --- WISHLIST ROUTES (SỬA LẠI CHỖ NÀY) ---
-// Thêm chữ '/wishlist' vào trước để khớp với frontend gọi /api/wishlist/add
-router.post('/wishlist/add', addToWishlist);              
-router.get('/wishlist/:userId', getWishlist);             
+// --- WISHLIST ROUTES ---
+router.post('/wishlist/add', addToWishlist);
+router.get('/wishlist/:userId', getWishlist);
 router.delete('/wishlist/:wishlistId', removeFromWishlist);
-export default router;
 
+export default router;

@@ -1,7 +1,9 @@
-// No comments to remove, file is clean.
-import db from './firestore.js';
+// src/services/userService.js
+import { db } from '../config/firebase.js';
 
 const usersCol = db.collection('users');
+
+// --- 1. CÁC HÀM TÌM KIẾM (FIND) ---
 
 export async function findUserByFirebaseUid(firebaseUid) {
   if (!firebaseUid) return null;
@@ -26,13 +28,97 @@ export async function findUserByPhone(phone, excludeFirebaseUid = null) {
   return { id: d.id, ...d.data() };
 }
 
+// --- 2. HÀM THỐNG KÊ DASHBOARD ---
+export async function getUserStats() {
+  try {
+    // 1. Đếm tổng user
+    const totalSnapshot = await usersCol.count().get();
+    const totalUsers = totalSnapshot.data().count;
+
+    // 2. Đếm user Premium
+    const premiumSnapshot = await usersCol.where('isPremium', '==', true).count().get();
+    const premiumUsers = premiumSnapshot.data().count;
+
+    // 3. Đếm Admin
+    const adminSnapshot = await usersCol.where('role', '==', 'admin').count().get();
+    const totalAdmins = adminSnapshot.data().count;
+
+    // 4. Đếm user mới (30 ngày qua)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    let newUsers = 0;
+    try {
+      const newUsersSnapshot = await usersCol.where('createdAt', '>=', thirtyDaysAgo).count().get();
+      newUsers = newUsersSnapshot.data().count;
+    } catch (e) {
+      // console.warn("Lỗi đếm newUsers (có thể do thiếu index Firestore):", e.message);
+    }
+
+    // 5. Tính tỷ lệ Premium
+    const premiumRate = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : 0;
+
+    return {
+      totalUsers,
+      premiumUsers,
+      totalAdmins,
+      newUsers,
+      premiumRate
+    };
+  } catch (error) {
+    console.error("Lỗi trong getUserStats:", error);
+    return { totalUsers: 0, premiumUsers: 0, totalAdmins: 0, newUsers: 0, premiumRate: 0 };
+  }
+}
+
+// --- 3. HÀM LIST USER (HỖ TRỢ PHÂN TRANG & TÌM KIẾM) ---
+export async function listUsers(limit = 10, lastId = null, search = '') {
+  let query = usersCol;
+
+  // Xử lý tìm kiếm (Search theo Email)
+  if (search) {
+    query = query.where('email', '>=', search).where('email', '<=', search + '\uf8ff');
+  } else {
+    query = query.orderBy('createdAt', 'desc');
+  }
+
+  // Xử lý phân trang
+  if (lastId) {
+    const lastDoc = await usersCol.doc(lastId).get();
+    if (lastDoc.exists) {
+      query = query.startAfter(lastDoc);
+    }
+  }
+
+  const snapshot = await query.limit(Number(limit)).get();
+
+  const users = snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt,
+      updatedAt: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt,
+    };
+  });
+
+  return {
+    users,
+    lastId: snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1].id : null
+  };
+}
+
+// --- 4. CÁC HÀM CẬP NHẬT / XÓA ---
+
 export async function createOrUpdateUser(user) {
   if (!user || !user.firebaseUid) throw new Error('firebaseUid required');
   const ref = usersCol.doc(user.firebaseUid);
-  // Lấy user cũ nếu có
+
+  // Lấy dữ liệu cũ trong DB ra trước
   const oldSnap = await ref.get();
   const oldData = oldSnap.exists ? oldSnap.data() : {};
-  // Chỉ cập nhật name nếu name cũ là rỗng, null, giống email trước @, hoặc giống displayName từ provider
+
+  // Logic xử lý tên
   let finalName = oldData.name;
   const isDefaultName = (name, email, displayName) => {
     if (!name || name === '') return true;
@@ -43,7 +129,8 @@ export async function createOrUpdateUser(user) {
   if (isDefaultName(finalName, user.email, user.displayName)) {
     finalName = user.name || '';
   }
-  // Avatar giữ logic cũ
+
+  // Logic xử lý Avatar
   let finalAvatarUrl = oldData.avatarUrl;
   const isProviderAvatar = (url) => {
     if (!url) return true;
@@ -58,6 +145,12 @@ export async function createOrUpdateUser(user) {
       ? user.avatarUrl
       : (oldData.avatarUrl || '');
   }
+
+  // --- QUAN TRỌNG: LOGIC GIỮ NGUYÊN ROLE ADMIN ---
+  // Nếu trong DB đã có role (ví dụ: 'admin') thì dùng lại role cũ.
+  // Nếu chưa có thì mới dùng role từ input hoặc mặc định là 'user'.
+  const finalRole = oldData.role ? oldData.role : (user.role || 'user');
+
   await ref.set({
     firebaseUid: user.firebaseUid,
     email: user.email || '',
@@ -73,8 +166,10 @@ export async function createOrUpdateUser(user) {
     chest: user.chest || null,
     waist: user.waist || null,
     hip: user.hip || null,
-    role: user.role || 'user',
-    isPremium: !!user.isPremium,
+
+    role: finalRole, // <--- Đã sửa để không bị ghi đè thành 'user'
+
+    isPremium: oldData.isPremium || !!user.isPremium,
     createdAt: oldData.createdAt || user.createdAt || new Date(),
     updatedAt: new Date(),
   }, { merge: true });
@@ -90,64 +185,6 @@ export async function updateUserByFirebaseUid(firebaseUid, updates) {
   await ref.set(updates, { merge: true });
   const snap = await ref.get();
   return { id: snap.id, ...snap.data() };
-}
-
-export async function listUsers(limit = 10, lastId = null, search = '') {
-  let query = usersCol.orderBy('createdAt', 'desc');
-
-  if (search) {
-    // Basic search simulation in Firestore (prefix match)
-    // Note: Firestore doesn't support full-text search natively without third-party services.
-    // This will search for names starting with the search string.
-    query = query.where('name', '>=', search).where('name', '<=', search + '\uf8ff');
-  }
-
-  if (lastId) {
-    const lastDoc = await usersCol.doc(lastId).get();
-    if (lastDoc.exists) {
-      query = query.startAfter(lastDoc);
-    }
-  }
-
-  const snap = await query.limit(limit).get();
-  const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  const lastVisible = snap.docs[snap.docs.length - 1];
-
-  return {
-    users,
-    lastId: lastVisible ? lastVisible.id : null
-  };
-}
-
-export async function getUserStats() {
-  const allUsersSnap = await usersCol.get();
-  const totalUsers = allUsersSnap.size;
-
-  // Calculate premium users
-  const premiumUsersSnap = await usersCol.where('isPremium', '==', true).get();
-  const premiumUsers = premiumUsersSnap.size;
-
-  // Calculate total admins
-  const adminsSnap = await usersCol.where('role', '==', 'admin').get();
-  const totalAdmins = adminsSnap.size;
-
-  // Get recent signups (last 30 days)
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const recentUsersSnap = await usersCol.where('createdAt', '>=', thirtyDaysAgo).get();
-  const newUsers = recentUsersSnap.size;
-
-  const premiumRate = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : 0;
-
-  return {
-    totalUsers,
-    premiumUsers,
-    newUsers,
-    totalAdmins,
-    premiumRate,
-    averageEngagement: 0
-  };
 }
 
 export async function deleteUserByFirebaseUid(firebaseUid) {

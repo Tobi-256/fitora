@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, Space, Divider, App } from 'antd';
 import { LockOutlined, MailOutlined, FacebookFilled, GoogleOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
-import api from '../services/api';
+import axios from 'axios';
 import './Login.css';
 
 const { Title } = Typography;
+
+// Địa chỉ Backend
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -23,15 +26,21 @@ export const Login = () => {
     try {
       if (!user) throw new Error("Không tìm thấy thông tin người dùng");
 
-      // Gọi API Sync qua service api (đã có baseURL chuẩn)
-      const res = await api.post(
-        '/users/sync',
+      // Lấy Token xác thực
+      const token = await user.getIdToken();
+
+      // Gọi API Sync
+      const res = await axios.post(
+        `${API_URL}/api/users/sync`,
         {
           firebaseUid: user.uid,
           email: user.email,
           name: user.displayName || user.email?.split('@')[0],
           avatarUrl: user.photoURL || '',
           providerId: user.providerData?.[0]?.providerId || 'password',
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
@@ -125,14 +134,13 @@ export const Login = () => {
               onFinish={onFinish}
               layout="vertical"
               size="middle"
-              autoComplete="off"
             >
               <Form.Item
                 label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Please enter a valid email!' }
+                  { required: true, message: 'Vui lòng nhập Email!' },
+                  { type: 'email', message: 'Email không hợp lệ!' }
                 ]}
               >
                 <Input prefix={<MailOutlined />} placeholder="Email" className="login-input" />
@@ -141,17 +149,15 @@ export const Login = () => {
               <Form.Item
                 label="Password"
                 name="password"
-                rules={[{ required: true, message: 'Please input your password!' }]}
+                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
               >
                 <Input.Password prefix={<LockOutlined />} placeholder="Password" className="login-input" />
               </Form.Item>
 
-              <Form.Item style={{ marginBottom: '16px' }}>
-                <div style={{ textAlign: 'right' }}>
-                  <Link to="/forgot-password" style={{ color: '#000', textDecoration: 'underline', fontSize: '13px' }}>
-                    Forgot Password?
-                  </Link>
-                </div>
+              <Form.Item style={{ marginBottom: '16px', textAlign: 'right' }}>
+                <Link to="/forgot-password" style={{ color: '#000', textDecoration: 'underline', fontSize: '13px' }}>
+                  Forgot Password?
+                </Link>
               </Form.Item>
 
               <Form.Item>
