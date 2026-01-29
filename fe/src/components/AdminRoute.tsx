@@ -5,17 +5,10 @@ import axios from 'axios';
 import { onAuthStateChanged } from 'firebase/auth';
 
 // URL Backend (Sửa lại nếu port khác)
-<<<<<<< HEAD
-const API_URL = 'http://localhost:5000';
-
-const AdminRoute = () => {
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null); 
-=======
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AdminRoute = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
->>>>>>> origin/deploy
 
   useEffect(() => {
     // FIX LỖI Ở ĐÂY: Kiểm tra nếu auth bị null thì không làm gì cả
@@ -29,20 +22,10 @@ const AdminRoute = () => {
       if (currentUser) {
         try {
           const token = await currentUser.getIdToken();
-<<<<<<< HEAD
-          
-=======
-
->>>>>>> origin/deploy
           // Gọi API lấy thông tin role chuẩn từ DB
           const res = await axios.get(`${API_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-<<<<<<< HEAD
-          
-=======
-
->>>>>>> origin/deploy
           if (res.data.role === 'admin') {
             setIsAdmin(true);
           } else {
@@ -62,11 +45,7 @@ const AdminRoute = () => {
 
   // Loading state
   if (isAdmin === null) {
-<<<<<<< HEAD
-    return <div style={{ padding: 20, textAlign: 'center' }}>Đang kiểm tra quyền Admin...</div>; 
-=======
     return <div style={{ padding: 20, textAlign: 'center' }}>Đang kiểm tra quyền Admin...</div>;
->>>>>>> origin/deploy
   }
 
   // Render

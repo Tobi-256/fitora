@@ -75,19 +75,6 @@ router.get('/users', verifyFirebaseToken, isAdmin, getAllUsers);
 router.put('/users/:id', verifyFirebaseToken, isAdmin, updateUser);
 router.delete('/users/:id', verifyFirebaseToken, isAdmin, deleteUser);
 
-<<<<<<< HEAD
-
-// --- PRODUCT ROUTES ---
-// router.get('/products/seed', seedProducts);
-router.get('/products', getAllProducts);               // Xem list products
-router.get('/products/:id', getProductDetail);         // Xem chi tiết
-router.post('/products/redirect', redirectPartner);    // Redirect Partner  
-
-// --- WISHLIST ROUTES ---
-router.post('/wishlist/add', addToWishlist);              
-router.get('/wishlist/:userId', getWishlist);             
-=======
-
 // --- PRODUCT ROUTES ---
 // router.get('/products/seed', seedProducts);
 router.get('/products', getAllProducts);               // Xem list products
@@ -97,7 +84,7 @@ router.post('/products/redirect', redirectPartner);    // Redirect Partner
 // --- WISHLIST ROUTES ---
 router.post('/wishlist/add', addToWishlist);
 router.get('/wishlist/:userId', getWishlist);
->>>>>>> origin/deploy
+
 router.delete('/wishlist/:wishlistId', removeFromWishlist);
 
 export default router;

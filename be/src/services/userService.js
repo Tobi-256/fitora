@@ -46,15 +46,6 @@ export async function getUserStats() {
     // 4. Đếm user mới (30 ngày qua)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-<<<<<<< HEAD
-    
-    let newUsers = 0;
-    try {
-        const newUsersSnapshot = await usersCol.where('createdAt', '>=', thirtyDaysAgo).count().get();
-        newUsers = newUsersSnapshot.data().count;
-    } catch (e) {
-        // console.warn("Lỗi đếm newUsers (có thể do thiếu index Firestore):", e.message);
-=======
 
     let newUsers = 0;
     try {
@@ -62,7 +53,6 @@ export async function getUserStats() {
       newUsers = newUsersSnapshot.data().count;
     } catch (e) {
       // console.warn("Lỗi đếm newUsers (có thể do thiếu index Firestore):", e.message);
->>>>>>> origin/deploy
     }
 
     // 5. Tính tỷ lệ Premium
@@ -87,15 +77,9 @@ export async function listUsers(limit = 10, lastId = null, search = '') {
 
   // Xử lý tìm kiếm (Search theo Email)
   if (search) {
-<<<<<<< HEAD
-     query = query.where('email', '>=', search).where('email', '<=', search + '\uf8ff');
-  } else {
-     query = query.orderBy('createdAt', 'desc');
-=======
     query = query.where('email', '>=', search).where('email', '<=', search + '\uf8ff');
   } else {
     query = query.orderBy('createdAt', 'desc');
->>>>>>> origin/deploy
   }
 
   // Xử lý phân trang
@@ -107,17 +91,6 @@ export async function listUsers(limit = 10, lastId = null, search = '') {
   }
 
   const snapshot = await query.limit(Number(limit)).get();
-<<<<<<< HEAD
-  
-  const users = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return { 
-          id: doc.id, 
-          ...data,
-          createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt,
-          updatedAt: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt,
-      };
-=======
 
   const users = snapshot.docs.map(doc => {
     const data = doc.data();
@@ -127,7 +100,6 @@ export async function listUsers(limit = 10, lastId = null, search = '') {
       createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt,
       updatedAt: data.updatedAt && data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt,
     };
->>>>>>> origin/deploy
   });
 
   return {
@@ -141,19 +113,11 @@ export async function listUsers(limit = 10, lastId = null, search = '') {
 export async function createOrUpdateUser(user) {
   if (!user || !user.firebaseUid) throw new Error('firebaseUid required');
   const ref = usersCol.doc(user.firebaseUid);
-<<<<<<< HEAD
-  
-  // Lấy dữ liệu cũ trong DB ra trước
-  const oldSnap = await ref.get();
-  const oldData = oldSnap.exists ? oldSnap.data() : {};
-  
-=======
 
   // Lấy dữ liệu cũ trong DB ra trước
   const oldSnap = await ref.get();
   const oldData = oldSnap.exists ? oldSnap.data() : {};
 
->>>>>>> origin/deploy
   // Logic xử lý tên
   let finalName = oldData.name;
   const isDefaultName = (name, email, displayName) => {
@@ -202,15 +166,9 @@ export async function createOrUpdateUser(user) {
     chest: user.chest || null,
     waist: user.waist || null,
     hip: user.hip || null,
-<<<<<<< HEAD
-    
-    role: finalRole, // <--- Đã sửa để không bị ghi đè thành 'user'
-    
-=======
 
     role: finalRole, // <--- Đã sửa để không bị ghi đè thành 'user'
 
->>>>>>> origin/deploy
     isPremium: oldData.isPremium || !!user.isPremium,
     createdAt: oldData.createdAt || user.createdAt || new Date(),
     updatedAt: new Date(),

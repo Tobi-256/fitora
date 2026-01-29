@@ -112,11 +112,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
 
             await syncUserToBackend(loginCredential.user);
-<<<<<<< HEAD
-            
-=======
-
->>>>>>> origin/deploy
             return loginCredential; // ✅ Đã thêm return
           } catch (loginError: unknown) {
             if (loginError instanceof Error && loginError.message.includes('wrong-password')) {

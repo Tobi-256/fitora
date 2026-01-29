@@ -460,18 +460,6 @@ export const updateUser = async (req, res) => {
     if (phone !== undefined) updates.phone = phone;
     if (address !== undefined) updates.address = address;
     if (gender !== undefined) {
-<<<<<<< HEAD
-        if (gender === '' || ['male', 'female', 'other'].includes(gender)) updates.gender = gender;
-        else return res.status(400).json({ message: 'Invalid gender value!' });
-    }
-    if (dateOfBirth !== undefined) {
-        if (dateOfBirth === '' || dateOfBirth === null) updates.dateOfBirth = null;
-        else {
-             const date = new Date(dateOfBirth);
-             if (isNaN(date.getTime())) return res.status(400).json({ message: 'Invalid date format!' });
-             updates.dateOfBirth = date;
-        }
-=======
       if (gender === '' || ['male', 'female', 'other'].includes(gender)) updates.gender = gender;
       else return res.status(400).json({ message: 'Invalid gender value!' });
     }
@@ -482,7 +470,6 @@ export const updateUser = async (req, res) => {
         if (isNaN(date.getTime())) return res.status(400).json({ message: 'Invalid date format!' });
         updates.dateOfBirth = date;
       }
->>>>>>> origin/deploy
     }
     if (role !== undefined) {
       if (['user', 'admin'].includes(role)) updates.role = role;
@@ -515,11 +502,6 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> origin/deploy
     const currentUser = await findUserByFirebaseUid(req.user.firebaseUid);
     if (currentUser && currentUser.id === id) {
       return res.status(400).json({ message: 'You cannot delete yourself!' });
