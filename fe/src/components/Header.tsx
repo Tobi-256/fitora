@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Button, Avatar, Space, Badge, Dropdown, Modal, Form, Input, App } from 'antd';
-import { 
-  UserOutlined, 
-  LogoutOutlined, 
-  CrownOutlined, 
-  ProfileOutlined, 
-  LockOutlined, 
-  HeartOutlined 
+import {
+  UserOutlined,
+  LogoutOutlined,
+  CrownOutlined,
+  ProfileOutlined,
+  LockOutlined,
+  HeartOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
 import { passwordValidationRules } from '../utils/passwordValidation';
@@ -65,6 +65,7 @@ export const Header = () => {
     <AntHeader className="app-header">
       <div className="header-container">
         <Link to="/" className="logo">
+          {/* <img src="/logo.jpg" alt="Fitora Logo" className="logo-img" /> */}
           <h1>FITORA</h1>
         </Link>
 
@@ -75,7 +76,7 @@ export const Header = () => {
               <Link to="/">
                 <Button type="text" className="nav-link-btn">HOME</Button>
               </Link>
-              <Link to="/product"> 
+              <Link to="/product">
                 <Button type="text" className="nav-link-btn">PRODUCT</Button>
               </Link>
               <Link to="/try-on">
@@ -138,8 +139,8 @@ export const Header = () => {
               >
                 <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
                   <Avatar
-                    src={userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/') 
-                      ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}` 
+                    src={userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('/uploads/')
+                      ? `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}${userProfile.avatarUrl}`
                       : userProfile?.avatarUrl || undefined}
                     icon={<UserOutlined />}
                     size="default"
@@ -157,10 +158,10 @@ export const Header = () => {
                 <Button type="text" className="nav-link-btn">HOME</Button>
               </Link>
 
-              <Link to="/product"> 
+              <Link to="/product">
                 <Button type="text" className="nav-link-btn">PRODUCT</Button>
               </Link>
-              
+
               <Link to="/try-on">
                 <Button type="text" className="nav-link-btn">TRY-ON</Button>
               </Link>
@@ -193,8 +194,8 @@ export const Header = () => {
             name="currentPassword"
             rules={[{ required: true, message: 'Please input your current password!' }]}
           >
-            <Input.Password 
-              prefix={<LockOutlined />} 
+            <Input.Password
+              prefix={<LockOutlined />}
               placeholder="Enter current password"
             />
           </Form.Item>
@@ -204,8 +205,8 @@ export const Header = () => {
             name="newPassword"
             rules={passwordValidationRules}
           >
-            <Input.Password 
-              prefix={<LockOutlined />} 
+            <Input.Password
+              prefix={<LockOutlined />}
               placeholder="Min 8 chars, uppercase, special char, number"
             />
           </Form.Item>
@@ -226,8 +227,8 @@ export const Header = () => {
               }),
             ]}
           >
-            <Input.Password 
-              prefix={<LockOutlined />} 
+            <Input.Password
+              prefix={<LockOutlined />}
               placeholder="Confirm new password"
             />
           </Form.Item>
@@ -237,9 +238,9 @@ export const Header = () => {
               <Button onClick={handleChangePasswordCancel}>
                 Cancel
               </Button>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
+              <Button
+                type="primary"
+                htmlType="submit"
                 loading={changePasswordLoading}
               >
                 Change Password

@@ -10,14 +10,14 @@ interface Variant {
 }
 
 interface Product {
-  id: string; 
+  id: string;
   _id?: string; // Fallback cho MongoDB
   name: string;
   price: number;
   image: string;
   brand: string;
   description?: string;
-  sizes?: string[]; 
+  sizes?: string[];
   colors?: string[];
   variants?: Variant[];
 }
@@ -28,9 +28,9 @@ const ProductDetail: React.FC = () => {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   // State lựa chọn
-  const [selectedSize, setSelectedSize] = useState<string>(''); 
+  const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImage, setActiveImage] = useState<string>('');
 
@@ -40,20 +40,20 @@ const ProductDetail: React.FC = () => {
   useEffect(() => {
     const fetchProductDetail = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/${id}`);
         const data = res.data;
         setProduct(data);
-        setActiveImage(data.image); 
+        setActiveImage(data.image);
 
         // Tự động chọn biến thể đầu tiên
         if (data.variants && data.variants.length > 0) {
-           const firstVar = data.variants[0];
-           setSelectedColor(firstVar.color);
-           setActiveImage(firstVar.image);
+          const firstVar = data.variants[0];
+          setSelectedColor(firstVar.color);
+          setActiveImage(firstVar.image);
         } else if (data.colors && data.colors.length > 0) {
-           setSelectedColor(data.colors[0]);
+          setSelectedColor(data.colors[0]);
         }
-        
+
         if (data.sizes?.length > 0) setSelectedSize(data.sizes[0]);
 
       } catch (error) {
@@ -74,23 +74,23 @@ const ProductDetail: React.FC = () => {
   // --- HÀM ADD TO WISHLIST (ĐÃ NÂNG CẤP UI) ---
   const handleAddToWishlist = async () => {
     if (!product) return;
-    
+
     // 1. Kiểm tra User đã đăng nhập chưa?
     const storedUser = localStorage.getItem('user');
 
     if (!storedUser) {
-        // Thay window.confirm bằng Modal đẹp
-        Modal.confirm({
-            title: 'Bạn chưa đăng nhập',
-            content: 'Bạn cần đăng nhập để thêm sản phẩm vào danh sách yêu thích. Bạn có muốn đi đăng nhập ngay không?',
-            okText: 'Đăng nhập ngay',
-            cancelText: 'Để sau',
-            centered: true,
-            onOk() {
-                navigate('/login');
-            }
-        });
-        return;
+      // Thay window.confirm bằng Modal đẹp
+      Modal.confirm({
+        title: 'Bạn chưa đăng nhập',
+        content: 'Bạn cần đăng nhập để thêm sản phẩm vào danh sách yêu thích. Bạn có muốn đi đăng nhập ngay không?',
+        okText: 'Đăng nhập ngay',
+        cancelText: 'Để sau',
+        centered: true,
+        onOk() {
+          navigate('/login');
+        }
+      });
+      return;
     }
 
     // 2. Validate Size/Màu
@@ -102,25 +102,25 @@ const ProductDetail: React.FC = () => {
     // 3. Lấy User ID thật từ LocalStorage
     let userId = null;
     try {
-        const parsedUser = JSON.parse(storedUser);
-        userId = parsedUser.id; 
+      const parsedUser = JSON.parse(storedUser);
+      userId = parsedUser.id;
     } catch (error) {
-        console.error("Lỗi đọc dữ liệu user:", error);
-        localStorage.removeItem('user');
-        navigate('/login');
-        return;
+      console.error("Lỗi đọc dữ liệu user:", error);
+      localStorage.removeItem('user');
+      navigate('/login');
+      return;
     }
 
     // 4. Gọi API
     setWishlistLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/wishlist/add', {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/wishlist/add`, {
         userId: userId,
-        productId: product._id || product.id, 
+        productId: product._id || product.id,
         selectedSize,
         selectedColor
       });
-      
+
       // Thông báo thành công đẹp (Toast)
       message.success(" Đã thêm vào danh sách yêu thích!");
 
@@ -137,25 +137,25 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  if (loading) return <div style={{padding: 40, textAlign: 'center'}}>Đang tải...</div>;
-  if (!product) return <div style={{padding: 40, textAlign: 'center'}}>Không tìm thấy sản phẩm</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Đang tải...</div>;
+  if (!product) return <div style={{ padding: 40, textAlign: 'center' }}>Không tìm thấy sản phẩm</div>;
 
   return (
     <div className="product-detail-container">
       {/* CỘT TRÁI: ẢNH */}
       <div className="gallery-section">
         <div className="thumbnail-list">
-           {product.variants && product.variants.length > 0 ? (
-               product.variants.map((v, idx) => (
-                   <img 
-                       key={idx} src={v.image} alt="thumb" 
-                       className={`thumb-img ${activeImage === v.image ? 'active' : ''}`}
-                       onClick={() => handleVariantClick(v)}
-                   />
-               ))
-           ) : (
-               [1, 2, 3].map((_, i) => <img key={i} src={product.image} className="thumb-img" alt="thumb"/>)
-           )}
+          {product.variants && product.variants.length > 0 ? (
+            product.variants.map((v, idx) => (
+              <img
+                key={idx} src={v.image} alt="thumb"
+                className={`thumb-img ${activeImage === v.image ? 'active' : ''}`}
+                onClick={() => handleVariantClick(v)}
+              />
+            ))
+          ) : (
+            [1, 2, 3].map((_, i) => <img key={i} src={product.image} className="thumb-img" alt="thumb" />)
+          )}
         </div>
         <div className="main-image-wrapper">
           <img src={activeImage} alt={product.name} className="main-image" />
@@ -164,13 +164,13 @@ const ProductDetail: React.FC = () => {
 
       {/* CỘT PHẢI: THÔNG TIN */}
       <div className="info-section">
-        
+
         <div className="product-header-row">
-            <span className="brand-label">Brand: {product.brand || 'NO BRAND'}</span>
+          <span className="brand-label">Brand: {product.brand || 'NO BRAND'}</span>
         </div>
 
         <h1 className="product-title">{product.name}</h1>
-        
+
         <div className="product-price">
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
         </div>
@@ -183,7 +183,7 @@ const ProductDetail: React.FC = () => {
               product.variants.map((v, index) => (
                 <div key={index} onClick={() => handleVariantClick(v)}
                   className="color-circle"
-                  style={{ 
+                  style={{
                     backgroundColor: v.color,
                     border: selectedColor === v.color ? '2px solid #333' : '1px solid #ddd',
                     transform: selectedColor === v.color ? 'scale(1.1)' : 'scale(1)',
@@ -213,25 +213,25 @@ const ProductDetail: React.FC = () => {
         </div>
 
         <div className="description-section">
-            <h3 className="desc-title">Mô tả</h3>
-            <p style={{ whiteSpace: 'pre-line', color: '#555' }}>{product.description || "Chưa có mô tả."}</p>
+          <h3 className="desc-title">Mô tả</h3>
+          <p style={{ whiteSpace: 'pre-line', color: '#555' }}>{product.description || "Chưa có mô tả."}</p>
         </div>
 
         {/* NÚT HÀNH ĐỘNG */}
         <div className="action-buttons">
-          
+
           {/* --- NÚT WISHLIST TĨNH (KHÔNG ĐỔI MÀU) --- */}
-          <button 
-            className="btn-wishlist" 
+          <button
+            className="btn-wishlist"
             onClick={handleAddToWishlist}
             disabled={wishlistLoading}
           >
-             {wishlistLoading ? 'Đang xử lý...' : '♡ THÊM VÀO YÊU THÍCH'}
+            {wishlistLoading ? 'Đang xử lý...' : '♡ THÊM VÀO YÊU THÍCH'}
           </button>
 
           <button className="btn-try-on">Virtual Try On</button>
-          
-          <button className="btn-shop" onClick={() => navigate('/products')}>Back To Shop</button>
+
+          <button className="btn-shop" onClick={() => navigate('/product')}>Back To Shop</button>
         </div>
       </div>
     </div>

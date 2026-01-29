@@ -7,15 +7,11 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-  {
-    "source": "/api/**",
-    "destination": "https://fitora-2jck.onrender.com/api/**"
-  },
-  {
-    "source": "**",
-    "destination": "/index.html"
-  }
-]
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   },
   "emulators": {
     "auth": {

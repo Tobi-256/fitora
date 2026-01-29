@@ -17,7 +17,7 @@ const ProductList: React.FC = () => {
   // 2. Chỉ cần giữ State products và loading
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   const navigate = useNavigate();
 
   // Hàm gọi API lấy TOÀN BỘ sản phẩm
@@ -25,8 +25,8 @@ const ProductList: React.FC = () => {
     setLoading(true);
     try {
       // Gọi API Backend (Không truyền tham số category nữa
-      const res = await axios.get('http://localhost:5000/api/products'); 
-      
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products`);
+
       setProducts(res.data);
     } catch (error) {
       console.error("Lỗi lấy dữ liệu:", error);
@@ -59,24 +59,24 @@ const ProductList: React.FC = () => {
         <div className="product-grid">
           {products.map((item) => (
             <div key={item.id} className="product-card">
-              
+
               {/* Ảnh sản phẩm */}
               <div className="img-wrapper">
-                <img 
-                  src={item.image || 'https://via.placeholder.com/300x400'} 
-                  alt={item.name} 
-                  className="product-img" 
+                <img
+                  src={item.image || 'https://via.placeholder.com/300x400'}
+                  alt={item.name}
+                  className="product-img"
                 />
               </div>
 
               {/* Thông tin */}
               <div className="brand-name">{item.brand || 'NO BRAND'}</div>
               <div className="product-name" title={item.name}>{item.name}</div>
-              
+
               {/* Giá & Nút See more */}
               <div className="card-footer">
                 <span className="price">{formatPrice(item.price)}</span>
-                <span 
+                <span
                   className="see-more"
                   onClick={() => navigate(`/product/${item.id}`)}
                 >

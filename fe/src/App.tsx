@@ -52,7 +52,6 @@ function App() {
                   <Route path="/admin/login" element={<AdminLogin />} />
                   {/* --- KHU VỰC ADMIN (KHÔNG CÓ HEADER WEBSITE) --- */}
                   <Route element={<AdminRoute />}>
-                  
                     <Route path="/admin/dashboard" element={<Dashboard />} />
                   </Route>
 
@@ -64,7 +63,6 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
-                    
                     <Route
                       path="/profile"
                       element={
@@ -73,16 +71,16 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    
+
                     <Route path="/product/:id" element={<ProductDetail />} />
 
-                    <Route 
-                      path="/try-on" 
+                    <Route
+                      path="/try-on"
                       element={
                         <ProtectedRoute>
                           <TryOn />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
                   </Route>
                 </Routes>

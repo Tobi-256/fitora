@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Avatar3D from '../components/Avatar3D';
-import Sidebar from '../components/Sidebar';
-import ItemList from '../components/ItemList';
+// import Sidebar from '../components/Sidebar';
+// import ItemList from '../components/ItemList';
 import { useAuth } from '../contexts/useAuth';
 import { updateProfile } from '../services/userService';
 
@@ -60,7 +60,7 @@ export default function TryOn() {
 
 	return (
 		<div style={{ display: 'flex', minHeight: '100vh', background: '#fafbfc' }}>
-			<Sidebar />
+			{/* <Sidebar /> */}
 			<div style={{ flex: 1, padding: '24px 60px', display: 'flex', flexDirection: 'column' }}>
 				<header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
 					<h2 style={{ fontSize: 24, margin: 0 }}>Virtual Fitting Room</h2>
@@ -82,7 +82,7 @@ export default function TryOn() {
 							/>
 						</div>
 						<div style={{ height: 120 }}>
-							<ItemList />
+							{/* <ItemList /> */}
 						</div>
 					</div>
 

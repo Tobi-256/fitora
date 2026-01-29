@@ -6,7 +6,11 @@ import { auth } from '../config/firebase.js';
 export const verifyFirebaseToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> origin/deploy
     // Kiểm tra header có tồn tại và đúng định dạng "Bearer <token>"
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
@@ -23,7 +27,11 @@ export const verifyFirebaseToken = async (req, res, next) => {
 
     // Xác thực token với Firebase
     const decodedToken = await auth.verifyIdToken(token);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> origin/deploy
     // Lưu thông tin cơ bản từ Firebase vào req.user
     req.user = {
       firebaseUid: decodedToken.uid,
@@ -58,7 +66,11 @@ export const isAdmin = async (req, res, next) => {
   try {
     // Dùng dynamic import để tránh lỗi vòng lặp (Circular Dependency) nếu có
     const { findUserByFirebaseUid } = await import('../services/userService.js');
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> origin/deploy
     // Lấy thông tin chi tiết user từ Database (Firestore)
     const user = await findUserByFirebaseUid(req.user.firebaseUid);
 
@@ -77,12 +89,21 @@ export const isAdmin = async (req, res, next) => {
 
     // Lưu full thông tin user từ DB vào req để dùng cho các controller phía sau
     req.dbUser = user;
+<<<<<<< HEAD
     
     next(); // Là Admin -> đi tiếp
   } catch (error) {
     console.error("Check Admin Error:", error);
     return res.status(500).json({ 
       message: 'Server error while checking permissions!' 
+=======
+
+    next(); // Là Admin -> đi tiếp
+  } catch (error) {
+    console.error("Check Admin Error:", error);
+    return res.status(500).json({
+      message: 'Server error while checking permissions!'
+>>>>>>> origin/deploy
     });
   }
 };

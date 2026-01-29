@@ -3,21 +3,36 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, Space, Divider, App } from 'antd';
 import { LockOutlined, MailOutlined, FacebookFilled, GoogleOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
+<<<<<<< HEAD
 import axios from 'axios';
+=======
+
+>>>>>>> origin/deploy
 import './Login.css';
 
 const { Title } = Typography;
 
 // Địa chỉ Backend
+<<<<<<< HEAD
 const API_URL = 'http://localhost:5000';
+=======
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+>>>>>>> origin/deploy
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null);
+<<<<<<< HEAD
   
   // 👇 1. Lấy thêm hàm logout từ useAuth
   const { login, loginWithGoogle, loginWithFacebook, logout } = useAuth();
   
+=======
+
+  // 👇 1. Lấy thêm hàm logout từ useAuth
+  const { login, loginWithGoogle, loginWithFacebook, logout } = useAuth();
+
+>>>>>>> origin/deploy
   const navigate = useNavigate();
   const { message } = App.useApp();
 
@@ -30,14 +45,25 @@ export const Login = () => {
       const token = await user.getIdToken();
 
       // Gọi API Sync
+<<<<<<< HEAD
       const res = await axios.post(
         `${API_URL}/api/users/sync`,
         {
+=======
+      const response = await fetch(`${API_URL}/api/users/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+>>>>>>> origin/deploy
           firebaseUid: user.uid,
           email: user.email,
           name: user.displayName || user.email?.split('@')[0],
           avatarUrl: user.photoURL || '',
           providerId: user.providerData?.[0]?.providerId || 'password',
+<<<<<<< HEAD
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -60,6 +86,34 @@ export const Login = () => {
              // Chuyển hướng sang trang Admin Login
              navigate('/admin/login');
              return; 
+=======
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      const resData = await response.json();
+
+      // Lấy data user từ phản hồi của Backend
+      const userData = resData?.user;
+
+      if (userData) {
+
+        // ⛔️⛔️ LOGIC CHẶN ADMIN ⛔️⛔️
+        if (userData.role === 'admin') {
+          message.warning('Tài khoản Admin vui lòng đăng nhập ở cổng Quản trị riêng!');
+
+          // 👇 2. Dùng hàm logout của Context thay vì signOut(auth) trực tiếp
+          // Hàm này sẽ lo việc gọi firebase signOut và xóa localStorage
+          await logout();
+
+          // Chuyển hướng sang trang Admin Login
+          navigate('/admin/login');
+          return;
+>>>>>>> origin/deploy
         }
 
         // Nếu là User thường -> Cho vào trang chủ
@@ -72,9 +126,14 @@ export const Login = () => {
 
     } catch (error: any) {
       console.error("Post-login error:", error);
+<<<<<<< HEAD
       const serverMsg = error.response?.data?.message;
       message.warning(serverMsg || 'Đăng nhập thành công, nhưng đồng bộ dữ liệu gặp lỗi.');
       
+=======
+      message.warning(error.message || 'Đăng nhập thành công, nhưng đồng bộ dữ liệu gặp lỗi.');
+
+>>>>>>> origin/deploy
       // Nếu lỗi server nhưng Firebase đã login, vẫn cho vào trang chủ
       navigate('/');
     }
@@ -92,7 +151,11 @@ export const Login = () => {
       if (error.code === 'auth/invalid-credential') msg = 'Sai email hoặc mật khẩu!';
       else if (error.code === 'auth/user-not-found') msg = 'Tài khoản không tồn tại!';
       else if (error.code === 'auth/wrong-password') msg = 'Sai mật khẩu!';
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> origin/deploy
       message.error(msg);
     } finally {
       setLoading(false);
@@ -105,7 +168,11 @@ export const Login = () => {
     try {
       const result: any = await loginFn();
       const userToSync = result?.user || result;
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> origin/deploy
       if (userToSync) {
         await handlePostLogin(userToSync);
       } else {
@@ -128,7 +195,7 @@ export const Login = () => {
         <Card className="login-card">
           <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
             <Title level={2} className="login-title">Welcome</Title>
-            
+
             <Form
               name="login"
               onFinish={onFinish}
@@ -143,7 +210,11 @@ export const Login = () => {
                   { type: 'email', message: 'Email không hợp lệ!' }
                 ]}
               >
+<<<<<<< HEAD
                 <Input prefix={<MailOutlined />} placeholder="Email" className="login-input"/>
+=======
+                <Input prefix={<MailOutlined />} placeholder="Email" className="login-input" />
+>>>>>>> origin/deploy
               </Form.Item>
 
               <Form.Item
@@ -151,7 +222,11 @@ export const Login = () => {
                 name="password"
                 rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
               >
+<<<<<<< HEAD
                 <Input.Password prefix={<LockOutlined />} placeholder="Password" className="login-input"/>
+=======
+                <Input.Password prefix={<LockOutlined />} placeholder="Password" className="login-input" />
+>>>>>>> origin/deploy
               </Form.Item>
 
               <Form.Item style={{ marginBottom: '16px', textAlign: 'right' }}>
@@ -161,10 +236,10 @@ export const Login = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button 
-                  type="primary" 
-                  htmlType="submit" 
-                  block 
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
                   loading={loading}
                   className="login-primary-btn"
                 >
@@ -176,9 +251,15 @@ export const Login = () => {
             <Divider plain>Or login with</Divider>
 
             <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+<<<<<<< HEAD
               
               <Button 
                 block 
+=======
+
+              <Button
+                block
+>>>>>>> origin/deploy
                 className="login-social-btn facebook-btn"
                 icon={<FacebookFilled style={{ fontSize: '18px', color: '#1877F2' }} />}
                 loading={socialLoading === 'facebook'}
@@ -187,8 +268,13 @@ export const Login = () => {
                 Login with Facebook
               </Button>
 
+<<<<<<< HEAD
               <Button 
                 block 
+=======
+              <Button
+                block
+>>>>>>> origin/deploy
                 className="login-social-btn google-btn"
                 icon={<GoogleOutlined style={{ fontSize: '18px', color: '#DB4437' }} />}
                 loading={socialLoading === 'google'}
@@ -206,9 +292,15 @@ export const Login = () => {
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+<<<<<<< HEAD
                <Link to="/admin/login" style={{ fontSize: '12px', color: '#999' }}>
                   Login to Admin Portal
                </Link>
+=======
+              <Link to="/admin/login" style={{ fontSize: '12px', color: '#999' }}>
+                Login to Admin Portal
+              </Link>
+>>>>>>> origin/deploy
             </div>
 
           </Space>

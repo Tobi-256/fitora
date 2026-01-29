@@ -38,5 +38,6 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
 }
 export const db = admin.firestore();
 export const auth = firebaseApp ? admin.auth() : null;
+export const storage = firebaseApp ? admin.storage() : null;
 export default admin;
 
