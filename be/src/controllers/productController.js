@@ -65,59 +65,40 @@ export const getAllProducts = async (req, res) => {
 //   try {
 //     const fullProductList = [
 //       {
-//         name: "Áo Thun FlexFit™In Puff 3D Nổi" + "Universe" + "The No Style 210 Be",
-//         price: 297000,
-//         category: "T-Shirt",
-//         brand: "Yame",
-//         description: "Áo sơ mi cổ ve HIỆU ỨNG IN PUFF 3D NỔI: Hình in nổi lạ mắt mực in đàn hồi tốt khắc phục triệt để nhược điểm dính hình khi gấp áolật, tay ngắn có gấu lật. Đáp một túi vuông trước ngực. Nhún li sau lưng. Cài khuy ẩn dưới vạt che phía trước."
-//         + "FlexFit™ 225GSM DÀY NHƯNG THỞ: Định lượng dày dặn giúp áo đứng dáng chống mất phom nhưng vẫn thoáng da nhờ sợi Compact"
-//         + "PHOM BOXY GIẤU DÁNG: Nới rộng ngang và hạ vai giúp che khuyết điểm cơ thể vận động vùng nách cực kỳ thoải mái"
-//         + "HÌNH IN KỴ NHIỆT TRỰC TIẾP: Cấu trúc mực in Puff 3D xốp nhẹ rất nhạy cảm với nhiệt độ cao dễ bị bẹp hoặc biến dạng vĩnh viễn nếu bàn ủi trượt trực tiếp lên mặt phải",
+//         name: "Quần Dài Form Rộng PN-STORE",
+//         price: 159000,
+//         category: "Pants",
+//         brand: "PN Store 1993s",
+//         description: "- Quần Dài Form Rộng PN.STORE vải nỉ 2da Track Pants Unisex Nam Nữ Local Brand Đứng Form Co Giãn Tốt Menswear Đen Q2DA \n- Quần dài nam nỉ 2 da là sản phẩm được làm từ chất liệu nỉ 2 da, giúp giữ ẩm tốt hơn so với các loại chất liệu khác. ",
+//         image: "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m2aqvljd0tyqd6@resize_w450_nl.webp",
         
-//         // Ảnh mặc định ban đầu
-//         image: "https://yame.vn/cdn/shop/files/TheNoStyle210Den1_edef4858-874a-4f6b-9523-940443c90ffa.jpg?v=1767179067&width=1100", 
-        
-//         // Size vẫn giữ đơn giản
-//         sizes: [ "S", "M", "L", "XL", "XXL"],
+//         // 1. TÍCH HỢP MODEL 3D THEO SIZE
+//         // Đường dẫn trỏ tới thư mục fe/public/quan_ao/ của bạn
+//         threeDModels: {
+          
+//           L: "/quan/quan_dai_1.glb",
+//         },
 
-//         // --- QUAN TRỌNG: CẤU TRÚC MÀU KÈM ẢNH ---
+//         sizes: [ "M"],
+
 //         variants: [
-//           { 
-//             color: "#000000", 
-//             image: "https://yame.vn/cdn/shop/files/TheNoStyle210Den1_edef4858-874a-4f6b-9523-940443c90ffa.jpg?v=1767179067&width=1100" 
-//           },
-//           { 
-//             color: "#28244a", 
-//             image: "https://yame.vn/cdn/shop/files/TheNoStyle210XanhD_ngD_m1_25e76f3e-ac94-4bac-a388-1dfbe827ef43.jpg?v=1767179293&width=1100" 
-//           },
-//           { 
-//             color: "#f0edef",
-//             image: "https://yame.vn/cdn/shop/files/The_No_Style_210_Xam_Nh_t_1.jpg?v=1767179379&width=1100" 
-//           },
-
-//           { 
-//             color: "#ede4da",
-//             image: "https://yame.vn/cdn/shop/files/TheNoStyle210Be1_59335df4-1c68-46b1-88ef-460a993bfd68.jpg?v=1767179130&width=1100" 
-//           },
-
-//           { 
-//             color: "#615d69",
-//             image: "https://yame.vn/cdn/shop/files/TheNoStyle210XamD_m1_09157be3-813a-4880-a935-afd108b3413a.jpg?v=1767179255&width=1100" 
-//           },
+//           { color: "#acabb0", image: "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m2qjijy5herqab@resize_w450_nl.webp" },
 
 //         ]
 //       },
-      
+     
+   
 //     ];
 
 //     let count = 0;
 //     for (const item of fullProductList) {
-//       // Create document in Firestore/MongoDB
 //       await ProductModel.create(item);
 //       count++;
 //     }
 
-//     res.status(200).json({ message: `SUCCESS! Đã thêm ${count} sản phẩm FULL tính năng vào kho!` });
+//     res.status(200).json({ 
+//       message: `SUCCESS! Đã thêm ${count} sản phẩm có tích hợp Model 3D vào kho!` 
+//     });
 //   } catch (error) {
 //     res.status(500).json({ message: "Lỗi nạp dữ liệu: " + error.message });
 //   }

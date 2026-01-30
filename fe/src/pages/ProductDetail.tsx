@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { message, Modal } from 'antd'; // Import Ant Design
+import { message, Modal } from 'antd'; 
 import './ProductDetail.css';
 
 interface Variant {
@@ -9,9 +9,10 @@ interface Variant {
   image: string;
 }
 
+// 1. CẬP NHẬT INTERFACE: Thêm threeDModels để nhận dữ liệu từ Firebase/DB
 interface Product {
   id: string;
-  _id?: string; // Fallback cho MongoDB
+  _id?: string;
   name: string;
   price: number;
   image: string;
@@ -20,6 +21,8 @@ interface Product {
   sizes?: string[];
   colors?: string[];
   variants?: Variant[];
+  threeDModels?: { [key: string]: string }; // Chứa link: { "S": "/ao/sizeS.glb", ... }
+  category?: string;
 }
 
 const ProductDetail: React.FC = () => {
@@ -29,12 +32,9 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // State lựa chọn
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImage, setActiveImage] = useState<string>('');
-
-  // State cho Wishlist (Chỉ dùng để loading, không dùng để đổi màu nút)
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
@@ -45,7 +45,6 @@ const ProductDetail: React.FC = () => {
         setProduct(data);
         setActiveImage(data.image);
 
-        // Tự động chọn biến thể đầu tiên
         if (data.variants && data.variants.length > 0) {
           const firstVar = data.variants[0];
           setSelectedColor(firstVar.color);
@@ -71,67 +70,66 @@ const ProductDetail: React.FC = () => {
     setActiveImage(variant.image);
   };
 
-  // --- HÀM ADD TO WISHLIST (ĐÃ NÂNG CẤP UI) ---
-  const handleAddToWishlist = async () => {
+  // 2. HÀM XỬ LÝ VIRTUAL TRY ON
+  const handleVirtualTryOn = () => {
     if (!product) return;
 
-    // 1. Kiểm tra User đã đăng nhập chưa?
+    // Kiểm tra xem sản phẩm có dữ liệu 3D không
+    if (!product.threeDModels) {
+      message.error("Sản phẩm này hiện chưa hỗ trợ thử đồ ảo!");
+      return;
+    }
+
+    // Lấy link model dựa trên size đang chọn (Ví dụ: "M")
+    const modelUrl = product.threeDModels[selectedSize];
+
+    if (!modelUrl) {
+      message.warning(`Size ${selectedSize} hiện chưa có sẵn mẫu 3D!`);
+      return;
+    }
+
+    // Chuyển hướng sang trang Try-On kèm dữ liệu model
+    navigate('/try-on', { 
+      state: { 
+        modelUrl: modelUrl, 
+        productName: product.name,
+        category: product.category // Để Canvas biết là mặc áo hay quần
+      } 
+    });
+  };
+
+  const handleAddToWishlist = async () => {
+    if (!product) return;
     const storedUser = localStorage.getItem('user');
 
     if (!storedUser) {
-      // Thay window.confirm bằng Modal đẹp
       Modal.confirm({
         title: 'Bạn chưa đăng nhập',
-        content: 'Bạn cần đăng nhập để thêm sản phẩm vào danh sách yêu thích. Bạn có muốn đi đăng nhập ngay không?',
+        content: 'Bạn cần đăng nhập để thêm yêu thích.',
         okText: 'Đăng nhập ngay',
         cancelText: 'Để sau',
-        centered: true,
-        onOk() {
-          navigate('/login');
-        }
+        onOk() { navigate('/login'); }
       });
       return;
     }
 
-    // 2. Validate Size/Màu
     if (!selectedSize || !selectedColor) {
-      message.warning(" Vui lòng chọn Size và Màu sắc trước nhé!");
+      message.warning("Vui lòng chọn Size và Màu sắc!");
       return;
     }
 
-    // 3. Lấy User ID thật từ LocalStorage
-    let userId = null;
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      userId = parsedUser.id;
-    } catch (error) {
-      console.error("Lỗi đọc dữ liệu user:", error);
-      localStorage.removeItem('user');
-      navigate('/login');
-      return;
-    }
-
-    // 4. Gọi API
     setWishlistLoading(true);
     try {
+      const parsedUser = JSON.parse(storedUser);
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/wishlist/add`, {
-        userId: userId,
+        userId: parsedUser.id,
         productId: product._id || product.id,
         selectedSize,
         selectedColor
       });
-
-      // Thông báo thành công đẹp (Toast)
-      message.success(" Đã thêm vào danh sách yêu thích!");
-
+      message.success("Đã thêm vào danh sách yêu thích!");
     } catch (error: any) {
-      if (error.response && error.response.status === 409) {
-        // Thông báo đã tồn tại
-        message.info(" Sản phẩm này (Size/Màu này) đã có trong Wishlist rồi!");
-      } else {
-        console.error("Lỗi API Wishlist:", error);
-        message.error("Lỗi kết nối! Vui lòng thử lại sau.");
-      }
+      message.error("Lỗi kết nối!");
     } finally {
       setWishlistLoading(false);
     }
@@ -142,7 +140,6 @@ const ProductDetail: React.FC = () => {
 
   return (
     <div className="product-detail-container">
-      {/* CỘT TRÁI: ẢNH */}
       <div className="gallery-section">
         <div className="thumbnail-list">
           {product.variants && product.variants.length > 0 ? (
@@ -154,7 +151,7 @@ const ProductDetail: React.FC = () => {
               />
             ))
           ) : (
-            [1, 2, 3].map((_, i) => <img key={i} src={product.image} className="thumb-img" alt="thumb" />)
+            <img src={product.image} className="thumb-img" alt="thumb" />
           )}
         </div>
         <div className="main-image-wrapper">
@@ -162,46 +159,32 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* CỘT PHẢI: THÔNG TIN */}
       <div className="info-section">
-
-        <div className="product-header-row">
-          <span className="brand-label">Brand: {product.brand || 'NO BRAND'}</span>
-        </div>
-
+        <span className="brand-label">Brand: {product.brand || 'NO BRAND'}</span>
         <h1 className="product-title">{product.name}</h1>
-
         <div className="product-price">
           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
         </div>
 
-        {/* Option Màu */}
         <div className="option-group">
           <span className="option-label">Màu sắc:</span>
           <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-            {product.variants && product.variants.length > 0 ? (
-              product.variants.map((v, index) => (
-                <div key={index} onClick={() => handleVariantClick(v)}
-                  className="color-circle"
-                  style={{
-                    backgroundColor: v.color,
-                    border: selectedColor === v.color ? '2px solid #333' : '1px solid #ddd',
-                    transform: selectedColor === v.color ? 'scale(1.1)' : 'scale(1)',
-                  }}
-                  title={v.color}
-                ></div>
-              ))
-            ) : (
-              <span>No Variants</span>
-            )}
+            {product.variants?.map((v, index) => (
+              <div key={index} onClick={() => handleVariantClick(v)}
+                className="color-circle"
+                style={{
+                  backgroundColor: v.color,
+                  border: selectedColor === v.color ? '2px solid #333' : '1px solid #ddd',
+                }}
+              ></div>
+            ))}
           </div>
         </div>
 
-        {/* Option Size */}
         <div className="option-group">
           <span className="option-label">Size:</span>
           <div className="size-list">
-            {product.sizes && product.sizes.map((size) => (
+            {product.sizes?.map((size) => (
               <button key={size}
                 className={`size-btn ${selectedSize === size ? 'selected' : ''}`}
                 onClick={() => setSelectedSize(size)}
@@ -214,22 +197,21 @@ const ProductDetail: React.FC = () => {
 
         <div className="description-section">
           <h3 className="desc-title">Mô tả</h3>
-          <p style={{ whiteSpace: 'pre-line', color: '#555' }}>{product.description || "Chưa có mô tả."}</p>
+          <p style={{ whiteSpace: 'pre-line', color: '#555' }}>{product.description}</p>
         </div>
 
-        {/* NÚT HÀNH ĐỘNG */}
         <div className="action-buttons">
-
-          {/* --- NÚT WISHLIST TĨNH (KHÔNG ĐỔI MÀU) --- */}
-          <button
-            className="btn-wishlist"
-            onClick={handleAddToWishlist}
-            disabled={wishlistLoading}
-          >
+          <button className="btn-wishlist" onClick={handleAddToWishlist} disabled={wishlistLoading}>
             {wishlistLoading ? 'Đang xử lý...' : '♡ THÊM VÀO YÊU THÍCH'}
           </button>
 
-          <button className="btn-try-on">Virtual Try On</button>
+          {/* 3. TÍCH HỢP NÚT VIRTUAL TRY ON */}
+          <button 
+            className="btn-try-on" 
+            onClick={handleVirtualTryOn}
+          >
+            Virtual Try On
+          </button>
 
           <button className="btn-shop" onClick={() => navigate('/product')}>Back To Shop</button>
         </div>
