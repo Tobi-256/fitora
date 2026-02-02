@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { OrbitControls, Center, Html, useProgress, ContactShadows, Environment } from '@react-three/drei';
 import { OBJLoader } from 'three-stdlib';
@@ -12,7 +12,7 @@ interface ClothingModelProps {
     category: 'top' | 'bottom';
 }
 
-function ClothingModel({ url, bodyScale, category }: ClothingModelProps) {
+function ClothingModel({ url, category }: ClothingModelProps) {
     const gltf = useLoader(GLTFLoader, url);
     const { gl } = useThree(); // Lấy thông số render để chỉnh độ nét
 
@@ -20,42 +20,42 @@ function ClothingModel({ url, bodyScale, category }: ClothingModelProps) {
     // Thay vì nhân với bodyScale, ta set cứng một con số (Ví dụ 1.08 là Size L chuẩn form)
     // Khi người to ra (> 1.08), thịt sẽ xuyên qua áo.
     // Khi người cao lên, áo sẽ thành áo ngắn (croptop).
-    const FIXED_SCALE = 1.08; 
-    
+    const FIXED_SCALE = 1.08;
+
     // Scale quần thường nhỏ hơn áo 1 xíu để áo phủ ngoài quần
     const scaleValue = category === 'top' ? FIXED_SCALE : (FIXED_SCALE - 0.01);
 
-    const yPosition = category === 'top' ? 0.15 : 0; 
+    const yPosition = category === 'top' ? 0.15 : 0;
 
     const clonedScene = React.useMemo(() => {
         const clone = gltf.scene.clone();
-        
+
         const box = new THREE.Box3().setFromObject(clone);
         const center = box.getCenter(new THREE.Vector3());
-        
+
         clone.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
                 child.position.x -= center.x;
                 child.position.z -= center.z;
-                
+
                 const mesh = child as THREE.Mesh;
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
-                mesh.renderOrder = category === 'top' ? 3 : 2; 
+                mesh.renderOrder = category === 'top' ? 3 : 2;
 
                 // --- XỬ LÝ TEXTURE (LÀM MỊN / KHỬ RĂNG CƯA) ---
                 if (mesh.material instanceof THREE.MeshStandardMaterial) {
                     const mat = mesh.material;
-                    
+
                     // 1. Tăng chất lượng ảnh (Fix lỗi "bể" hình)
                     if (mat.map) {
                         // Bật lọc bất đẳng hướng (Anisotropy) mức cao nhất -> Nhìn nghiêng vẫn nét
                         mat.map.anisotropy = gl.capabilities.getMaxAnisotropy();
-                        
+
                         // Bộ lọc tuyến tính giúp ảnh mượt hơn
                         mat.map.minFilter = THREE.LinearMipmapLinearFilter;
                         mat.map.magFilter = THREE.LinearFilter;
-                        
+
                         mat.map.needsUpdate = true;
                     }
 
@@ -71,11 +71,11 @@ function ClothingModel({ url, bodyScale, category }: ClothingModelProps) {
     }, [gltf, url, category, gl]);
 
     return (
-        <primitive 
-            object={clonedScene} 
-            position={[0, yPosition, 0]} 
+        <primitive
+            object={clonedScene}
+            position={[0, yPosition, 0]}
             // Áp dụng scale cố định -> Áo không dãn theo người
-            scale={[scaleValue, scaleValue, scaleValue]} 
+            scale={[scaleValue, scaleValue, scaleValue]}
         />
     );
 }
@@ -93,11 +93,11 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: any) {
                 if (!originalPositionsRef.current.has(child.uuid)) {
                     originalPositionsRef.current.set(child.uuid, child.geometry.attributes.position.array.slice());
                 }
-                child.renderOrder = 1; 
+                child.renderOrder = 1;
                 child.castShadow = true;
                 child.receiveShadow = true;
-                
-                if(child.material) {
+
+                if (child.material) {
                     child.material.color = new THREE.Color('#f0f0f0'); // Da sáng hơn chút
                     child.material.roughness = 0.6;
                 }
@@ -154,19 +154,19 @@ interface Avatar3DProps {
 export default function Avatar3D({ height, weight, shoulder, chest, waist, hip, shirtUrl, pantsUrl }: Avatar3DProps) {
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', background: '#f5f7fa' }}>
-            <Canvas 
-                camera={{ position: [0, 1.4, 3.5], fov: 40 }} 
-                shadows 
+            <Canvas
+                camera={{ position: [0, 1.4, 3.5], fov: 40 }}
+                shadows
                 dpr={[1, 2]} // 1. Tăng mật độ điểm ảnh (Sharpness) cho màn hình nét
-                gl={{ 
+                gl={{
                     antialias: true, // 2. Khử răng cưa
-                    toneMapping: THREE.ReinhardToneMapping, 
-                    toneMappingExposure: 1.2 
+                    toneMapping: THREE.ReinhardToneMapping,
+                    toneMappingExposure: 1.2
                 }}
             >
                 {/* Môi trường ánh sáng tự nhiên */}
                 <Environment preset="city" />
-                
+
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[5, 5, 5]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} />
                 <spotLight position={[0, 5, 2]} intensity={0.5} angle={0.5} penumbra={1} />
@@ -175,34 +175,34 @@ export default function Avatar3D({ height, weight, shoulder, chest, waist, hip, 
                     <Center disableY>
                         <group>
                             <HumanOBJModel height={height} weight={weight} shoulder={shoulder} chest={chest} waist={waist} hip={hip} />
-                            
+
                             {shirtUrl && (
-                                <ClothingModel 
+                                <ClothingModel
                                     key={shirtUrl}
-                                    url={shirtUrl} 
+                                    url={shirtUrl}
                                     category="top"
-                                    bodyScale={{ height, weight, shoulder, chest, waist, hip }} 
+                                    bodyScale={{ height, weight, shoulder, chest, waist, hip }}
                                 />
                             )}
-                            
+
                             {pantsUrl && (
-                                <ClothingModel 
+                                <ClothingModel
                                     key={pantsUrl}
-                                    url={pantsUrl} 
+                                    url={pantsUrl}
                                     category="bottom"
-                                    bodyScale={{ height, weight, shoulder, chest, waist, hip }} 
+                                    bodyScale={{ height, weight, shoulder, chest, waist, hip }}
                                 />
                             )}
                         </group>
                     </Center>
-                    
+
                     <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={10} blur={2.5} far={1} />
                 </Suspense>
 
-                <OrbitControls 
-                    target={[0, 0.9, 0]} 
+                <OrbitControls
+                    target={[0, 0.9, 0]}
                     enablePan={false}
-                    minPolarAngle={0} 
+                    minPolarAngle={0}
                     maxPolarAngle={Math.PI / 2 - 0.1}
                     enableDamping={true}
                     dampingFactor={0.05}
