@@ -20,6 +20,9 @@ import { verifyFirebaseToken, isAdmin } from '../middlewares/auth.js';
 import { uploadAvatar as uploadAvatarMiddleware } from '../utils/upload.js';
 import { getProductDetail, redirectPartner, getAllProducts} from '../controllers/productController.js';
 import { addToWishlist, getWishlist, removeFromWishlist } from '../controllers/wishlistController.js';
+import { addToCart, getCart, updateCartItem, removeFromCart } from '../controllers/cartController.js';
+import { createOrder, getMyOrders, getOrderDetail, updateOrderStatus } from '../controllers/orderController.js';
+import { getAllOrders } from '../controllers/orderController.js';
 
 const router = express.Router();
 
@@ -69,6 +72,7 @@ router.post('/users/logout', verifyFirebaseToken, logout);
 
 // 1. Thống kê Dashboard (Phải đặt TRƯỚC route /users/:id để không bị nhầm lẫn)
 router.get('/users/stats', verifyFirebaseToken, isAdmin, getAdminStats);
+router.get('/orders/all', verifyFirebaseToken, isAdmin, getAllOrders);
 
 // 2. Quản lý danh sách User
 router.get('/users', verifyFirebaseToken, isAdmin, getAllUsers);
@@ -84,7 +88,18 @@ router.post('/products/redirect', redirectPartner);    // Redirect Partner
 // --- WISHLIST ROUTES ---
 router.post('/wishlist/add', addToWishlist);
 router.get('/wishlist/:userId', getWishlist);
-
 router.delete('/wishlist/:wishlistId', removeFromWishlist);
 
+// --- CART ROUTES ---
+// Lưu ý: Nên dùng verifyFirebaseToken để bảo mật giỏ hàng theo đúng User
+router.get('/cart', verifyFirebaseToken, getCart); 
+router.post('/cart/add', verifyFirebaseToken, addToCart);
+router.put('/cart/update', verifyFirebaseToken, updateCartItem); // Cập nhật số lượng trong giỏ
+router.delete('/cart/remove', verifyFirebaseToken, removeFromCart); // Xóa món khỏi giỏ
+
+// --- ORDER ROUTES ---
+router.post('/orders', verifyFirebaseToken, createOrder);        // Đặt hàng
+router.get('/orders/my-orders', verifyFirebaseToken, getMyOrders);     // Xem lịch sử đơn hàng của tôi
+router.get('/:id', verifyFirebaseToken, getOrderDetail);
+router.put('/orders/:id/status', verifyFirebaseToken, isAdmin, updateOrderStatus); // Xem chi tiết 1 đơn hàng
 export default router;

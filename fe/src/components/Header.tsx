@@ -7,7 +7,9 @@ import {
   CrownOutlined,
   ProfileOutlined,
   LockOutlined,
-  HeartOutlined
+  HeartOutlined,
+  ShoppingCartOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/useAuth';
 import { passwordValidationRules } from '../utils/passwordValidation';
@@ -90,6 +92,12 @@ export const Header = () => {
                 </Button>
               </Link>
 
+              <Link to="/cart">
+                <Button type="text" className="nav-link-btn">
+                  <ShoppingCartOutlined /> CART
+                </Button>
+              </Link>
+
               {userProfile?.isPremium && (
                 <Badge.Ribbon text="Premium" color="gold">
                   <CrownOutlined style={{ fontSize: '20px', color: '#ffd700' }} />
@@ -121,6 +129,17 @@ export const Header = () => {
                     },
                     {
                       type: 'divider',
+                    },
+                    {
+                      key: 'orders',
+                      label: (
+                        <Link to="/my-orders" style={{ color: '#000', textDecoration: 'none' }}>
+                          <Space>
+                            <HistoryOutlined />
+                            <span>Order History</span>
+                          </Space>
+                        </Link>
+                      ),
                     },
                     {
                       key: 'logout',

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { message, Modal } from 'antd'; 
+import { message, Modal } from 'antd';
 import './ProductDetail.css';
+import { useCart } from '../contexts/useCart';;
+import { cartService } from '../services/api';
 
 interface Variant {
   color: string;
@@ -29,6 +31,8 @@ const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  const { refreshCart } = useCart();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -36,6 +40,7 @@ const ProductDetail: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [activeImage, setActiveImage] = useState<string>('');
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -65,6 +70,55 @@ const ProductDetail: React.FC = () => {
     if (id) fetchProductDetail();
   }, [id]);
 
+  // --- HÀM XỬ LÝ THÊM VÀO GIỎ HÀNG ---
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    // 1. Kiểm tra đăng nhập
+    const token = localStorage.getItem('firebaseToken');
+    if (!token) {
+      Modal.confirm({
+        title: 'Yêu cầu đăng nhập',
+        content: 'Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.',
+        okText: 'Đăng nhập',
+        cancelText: 'Hủy',
+        onOk() { navigate('/login'); }
+      });
+      return;
+    }
+
+    // 2. Kiểm tra lựa chọn size/màu
+    if (!selectedSize) {
+      message.warning("Vui lòng chọn Size!");
+      return;
+    }
+
+    setCartLoading(true);
+    try {
+      // 3. Gọi service để lưu vào DB
+      await cartService.addToCart({
+        productId: product._id || product.id,
+        name: product.name,
+        price: product.price,
+        image: activeImage, // Lưu ảnh của variant đang chọn
+        size: selectedSize,
+        quantity: 1
+      });
+
+      // 4. Cập nhật số lượng trên Header ngay lập tức
+      await refreshCart();
+
+      message.success("Đã thêm vào giỏ hàng!");
+
+      // Nếu muốn thêm xong nhảy sang trang giỏ hàng thì dùng: 
+      // navigate('/cart');
+    } catch (error: any) {
+      message.error(error.response?.data?.message || "Không thể thêm vào giỏ hàng!");
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
   const handleVariantClick = (variant: Variant) => {
     setSelectedColor(variant.color);
     setActiveImage(variant.image);
@@ -89,12 +143,12 @@ const ProductDetail: React.FC = () => {
     }
 
     // Chuyển hướng sang trang Try-On kèm dữ liệu model
-    navigate('/try-on', { 
-      state: { 
-        modelUrl: modelUrl, 
+    navigate('/try-on', {
+      state: {
+        modelUrl: modelUrl,
         productName: product.name,
         category: product.category // Để Canvas biết là mặc áo hay quần
-      } 
+      }
     });
   };
 
@@ -206,14 +260,21 @@ const ProductDetail: React.FC = () => {
           </button>
 
           {/* 3. TÍCH HỢP NÚT VIRTUAL TRY ON */}
-          <button 
-            className="btn-try-on" 
+          <button
+            className="btn-try-on"
             onClick={handleVirtualTryOn}
           >
             Virtual Try On
           </button>
 
-          <button className="btn-shop" onClick={() => navigate('/product')}>Back To Shop</button>
+          {/* NÚT THÊM GIỎ HÀNG ĐÃ CẬP NHẬT LOGIC */}
+          <button
+            className="btn-shop"
+            onClick={handleAddToCart}
+            disabled={cartLoading}
+          >
+            {cartLoading ? 'ĐANG THÊM...' : 'THÊM VÀO GIỎ HÀNG'}
+          </button>
         </div>
       </div>
     </div>

@@ -17,8 +17,13 @@ import ProductDetail from './pages/ProductDetail';
 import Dashboard from './pages/Dashboard.tsx'; // Import Dashboard
 import TryOn from './pages/TryOn';
 import Wishlist from './pages/Wishlist';
-
+import Cart from './pages/Cart';
+import { CartProvider } from './contexts/CartContext.tsx';
 import './App.css';
+import Checkout from './pages/Checkout.tsx';
+import OrderHistory from './pages/OrderHistory.tsx';
+import OrderDetail from './pages/OrderDetail.tsx';
+import AdminOrders from './pages/AdminOrders';
 
 // Layout cho các trang người dùng thường (Có Header + Main Content)
 const MainLayout = () => {
@@ -46,6 +51,7 @@ function App() {
       >
         <AntApp>
           <AuthProvider>
+            <CartProvider>
             <Router>
               <div className="app">
                 <Routes>
@@ -53,6 +59,7 @@ function App() {
                   {/* --- KHU VỰC ADMIN (KHÔNG CÓ HEADER WEBSITE) --- */}
                   <Route element={<AdminRoute />}>
                     <Route path="/admin/dashboard" element={<Dashboard />} />
+                    <Route path="/admin/orders" element={<AdminOrders />} />
                   </Route>
 
                   {/* --- KHU VỰC NGƯỜI DÙNG (CÓ HEADER WEBSITE) --- */}
@@ -60,6 +67,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/product" element={<ProductList />} />
                     <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/cart" element={<Cart />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -71,9 +79,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-
                     <Route path="/product/:id" element={<ProductDetail />} />
-
                     <Route
                       path="/try-on"
                       element={
@@ -82,10 +88,19 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+
+                    <Route path="/my-orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+
+                    <Route path="/order-detail/:id" element={<OrderDetail />} />
                   </Route>
+                  
+                      
+
                 </Routes>
               </div>
             </Router>
+            </CartProvider>
           </AuthProvider>
         </AntApp>
       </ConfigProvider>
