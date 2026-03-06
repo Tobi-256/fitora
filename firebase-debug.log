@@ -1,0 +1,83 @@
+[debug] [2026-03-06T20:04:26.262Z] ----------------------------------------------------------------------
+[debug] [2026-03-06T20:04:26.268Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Lenovo\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --import=./emulator-data --export-on-exit
+[debug] [2026-03-06T20:04:26.268Z] CLI Version:   15.1.0
+[debug] [2026-03-06T20:04:26.268Z] Platform:      win32
+[debug] [2026-03-06T20:04:26.268Z] Node Version:  v24.12.0
+[debug] [2026-03-06T20:04:26.268Z] Time:          Sat Mar 07 2026 03:04:26 GMT+0700 (Indochina Time)
+[debug] [2026-03-06T20:04:26.268Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-06T20:04:27.800Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] Failed to authenticate, have you run firebase login?
+[warn] !  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
+[debug] [2026-03-06T20:04:27.976Z] java version "21.0.8" 2025-07-15 LTS
+Java(TM) SE Runtime Environment (build 21.0.8+12-LTS-250)
+
+[debug] [2026-03-06T20:04:27.977Z] Java HotSpot(TM) 64-Bit Server VM (build 21.0.8+12-LTS-250, mixed mode, sharing)
+
+[debug] [2026-03-06T20:04:27.991Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: auth, firestore, hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting"}}
+[debug] [2026-03-06T20:04:28.001Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-06T20:04:28.001Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-06T20:04:28.001Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-06T20:04:28.001Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-06T20:04:28.001Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-06T20:04:28.001Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-03-06T20:04:28.004Z] Emulator locator file path: C:\Users\Lenovo\AppData\Local\Temp\hub-fitora-e1beb.json
+[debug] [2026-03-06T20:04:28.004Z] [hub] writing locator at C:\Users\Lenovo\AppData\Local\Temp\hub-fitora-e1beb.json
+[info] i  firestore: Importing data from D:\FPT\Giao_trinh\ky_08\EXE201\fitora\emulator-data\firestore_export\firestore_export.overall_export_metadata {"metadata":{"emulator":{"name":"firestore"},"message":"Importing data from D:\\FPT\\Giao_trinh\\ky_08\\EXE201\\fitora\\emulator-data\\firestore_export\\firestore_export.overall_export_metadata"}}
+[warn] !  firestore: Cloud Firestore Emulator does not support multiple databases yet. {"metadata":{"emulator":{"name":"firestore"},"message":"Cloud Firestore Emulator does not support multiple databases yet."}}
+[warn] !  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file. {"metadata":{"emulator":{"name":"firestore"},"message":"Did not find a Cloud Firestore rules file specified in a firebase.json config file."}}
+[warn] !  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"firestore"},"message":"The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
+[debug] [2026-03-06T20:04:28.010Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-03-06T20:04:28.010Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-03-06T20:04:28.011Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Lenovo\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fitora-e1beb","--seed_from_export","D:\\FPT\\Giao_trinh\\ky_08\\EXE201\\fitora\\emulator-data\\firestore_export\\firestore_export.overall_export_metadata","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Lenovo\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fitora-e1beb\",\"--seed_from_export\",\"D:\\\\FPT\\\\Giao_trinh\\\\ky_08\\\\EXE201\\\\fitora\\\\emulator-data\\\\firestore_export\\\\firestore_export.overall_export_metadata\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[info] i  auth: Importing config from D:\FPT\Giao_trinh\ky_08\EXE201\fitora\emulator-data\auth_export\config.json {"metadata":{"emulator":{"name":"auth"},"message":"Importing config from D:\\FPT\\Giao_trinh\\ky_08\\EXE201\\fitora\\emulator-data\\auth_export\\config.json"}}
+[info] i  auth: Importing accounts from D:\FPT\Giao_trinh\ky_08\EXE201\fitora\emulator-data\auth_export\accounts.json {"metadata":{"emulator":{"name":"auth"},"message":"Importing accounts from D:\\FPT\\Giao_trinh\\ky_08\\EXE201\\fitora\\emulator-data\\auth_export\\accounts.json"}}
+[debug] [2026-03-06T20:04:35.642Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.642Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.642Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-06T20:04:35.642Z] Failed to list hosting sites
+[debug] Failed to authenticate, have you run firebase login?
+[debug] [2026-03-06T20:04:35.642Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.643Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.643Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-06T20:04:35.643Z] fetchWebSetup error: FirebaseError: Failed to authenticate, have you run firebase login?
+[warn] !  hosting: Could not fetch web app configuration and there is no cached configuration on this machine. Check your internet connection and make sure you are authenticated. To continue, you must call firebase.initializeApp({...}) in your code before using Firebase. 
+[debug] [2026-03-06T20:04:35.644Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.644Z] No OAuth tokens found
+[debug] [2026-03-06T20:04:35.644Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-06T20:04:35.644Z] Failed to authenticate, have you run firebase login? (original: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.)
+[debug] [2026-03-06T20:04:35.645Z] Specified "public" directory "fe/dist" does not exist; Deploy to Hosting site "fitora-e1beb" may fail or be empty.
+[info] i  hosting[fitora-e1beb]: Serving hosting files from: fe/dist {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfe/dist\u001b[22m"}}
+[info] +  hosting[fitora-e1beb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2026-03-06T20:04:35.664Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:10 +0000] "OPTIONS /api/users/sync HTTP/1.1" 404 157 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:10 +0000] \"OPTIONS /api/users/sync HTTP/1.1\" 404 157 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:16 +0000] "OPTIONS /api/users/sync HTTP/1.1" 404 157 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:16 +0000] \"OPTIONS /api/users/sync HTTP/1.1\" 404 157 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] "GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1" 404 180 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] \"GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1\" 404 180 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] "GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1" 404 180 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] \"GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1\" 404 180 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] "GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1" 404 180 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:19 +0000] \"GET /api/wishlist/fkQ6Kzttx6eHvmaKLRse4NpUGwn2 HTTP/1.1\" 404 180 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] "GET /api/products HTTP/1.1" 404 151 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] \"GET /api/products HTTP/1.1\" 404 151 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] "GET /api/products HTTP/1.1" 404 151 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] \"GET /api/products HTTP/1.1\" 404 151 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
+[info] i  hosting: 127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] "GET /api/products HTTP/1.1" 404 151 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [06/Mar/2026:20:14:25 +0000] \"GET /api/products HTTP/1.1\" 404 151 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0\""}}
