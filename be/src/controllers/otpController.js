@@ -1,5 +1,5 @@
 import { generateOTP, storeOTP, verifyOTP, getOTP } from '../services/otpService.js';
-import { sendMail } from '../utils/email.js';
+import { sendMail } from '../utils/email.resend.js';
 import { getRegistrationOTPTemplate, getPasswordResetOTPTemplate } from '../utils/emailTemplates.js';
 
 export const sendOTP = async (req, res) => {
@@ -40,15 +40,12 @@ export const sendOTP = async (req, res) => {
         text: emailTemplate.text,
       });
 
-
       res.json({
         success: true,
         message: 'OTP code has been sent to your email!',
-        // In development, always return OTP for testing
         otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
       });
     } catch (emailError) {
-      // If email config is missing or network/SMTP error occurs, in development return success with OTP
       const isDev = process.env.NODE_ENV !== 'production';
       const isConfigMissing = emailError.message?.includes('Email configuration is missing');
       const isNetworkError = emailError.code === 'ESOCKET' || emailError.code === 'ECONNRESET' || emailError.code === 'ENOTFOUND';
@@ -81,7 +78,6 @@ export const verifyOTPCode = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // Validate input
     if (!email || !otp) {
       return res.status(400).json({
         success: false,
@@ -114,7 +110,6 @@ export const verifyOTPCode = async (req, res) => {
         message: result.message,
       });
     } else {
-      // Return 400 with clear error message
       res.status(400).json({
         success: false,
         message: result.message,
