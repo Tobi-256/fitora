@@ -17,6 +17,7 @@ const defaultBody = {
 export default function TryOn() {
 	const { userProfile, refreshUserProfile } = useAuth();
 	const [body, setBody] = useState(defaultBody);
+	const [gender, setGender] = useState<'male' | 'female'>('male');
 	const [saving, setSaving] = useState(false);
 	const [saved, setSaved] = useState(false);
 	const [resetKey, setResetKey] = useState(0);
@@ -32,6 +33,10 @@ export default function TryOn() {
 				waist: userProfile.waist || defaultBody.waist,
 				hip: userProfile.hip || defaultBody.hip,
 			});
+			// Optionally load gender if it exists in profile
+			if (userProfile.gender) {
+				setGender(userProfile.gender as 'male' | 'female');
+			}
 		}
 	}, [userProfile]);
 
@@ -41,13 +46,14 @@ export default function TryOn() {
 	};
 	const handleReset = () => {
 		setBody(defaultBody);
+		setGender('male');
 		setSaved(false);
 		setResetKey(prev => prev + 1);
 	};
 	const handleSave = async () => {
 		setSaving(true);
 		try {
-			await updateProfile(body);
+			await updateProfile({ ...body, gender });
 			await refreshUserProfile();
 			setSaved(true);
 		} catch (error) {
@@ -72,13 +78,14 @@ export default function TryOn() {
 					<div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: 20 }}>
 						<div style={{ flex: 1, minHeight: 0 }}>
 							<Avatar3D
-								key={resetKey}
+								key={`${resetKey}-${gender}`}
 								height={body.height}
 								weight={body.weight}
 								shoulder={body.shoulder}
 								chest={body.chest}
 								waist={body.waist}
 								hip={body.hip}
+								gender={gender}
 							/>
 						</div>
 						<div style={{ height: 120 }}>
@@ -89,11 +96,51 @@ export default function TryOn() {
 					{/* Controls Sidebar */}
 					<div style={{ flex: 1, minWidth: 280, maxWidth: 350, background: '#fff', borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: 24, overflowY: 'auto' }}>
 						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-							<div style={{ fontWeight: 700, fontSize: 18 }}>Body Measurements</div>
+							<div style={{ fontWeight: 700, fontSize: 18 }}>Model Customization</div>
 							<button onClick={handleReset} style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 13, textDecoration: 'underline' }}>Reset All</button>
 						</div>
 
+						{/* Gender Toggles */}
+						<div style={{ marginBottom: 24 }}>
+							<div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: '#444' }}>Gender</div>
+							<div style={{ display: 'flex', gap: 10, background: '#f5f5f7', padding: 4, borderRadius: 10 }}>
+								<button
+									onClick={() => setGender('male')}
+									style={{
+										flex: 1,
+										padding: '8px',
+										borderRadius: 8,
+										border: 'none',
+										background: gender === 'male' ? '#fff' : 'transparent',
+										boxShadow: gender === 'male' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+										fontWeight: gender === 'male' ? 600 : 400,
+										cursor: 'pointer',
+										transition: 'all 0.2s'
+									}}
+								>
+									Male
+								</button>
+								<button
+									onClick={() => setGender('female')}
+									style={{
+										flex: 1,
+										padding: '8px',
+										borderRadius: 8,
+										border: 'none',
+										background: gender === 'female' ? '#fff' : 'transparent',
+										boxShadow: gender === 'female' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+										fontWeight: gender === 'female' ? 600 : 400,
+										cursor: 'pointer',
+										transition: 'all 0.2s'
+									}}
+								>
+									Female
+								</button>
+							</div>
+						</div>
+
 						<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+							<div style={{ fontSize: 14, fontWeight: 600, color: '#444' }}>Body Measurements</div>
 							<SliderWithValue label="Height" min={0.8} max={1.2} step={0.01} value={body.height} onChange={v => handleSlider('height', v)} unit="m" displayValue={Math.round(body.height * 170) + ' cm'} />
 							<SliderWithValue label="Weight" min={0.8} max={1.2} step={0.01} value={body.weight} onChange={v => handleSlider('weight', v)} unit="kg" displayValue={Math.round(body.weight * 50) + 60 + ' kg'} />
 

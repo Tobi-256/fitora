@@ -2,7 +2,7 @@ import React, { useState, Suspense, Component, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Center, Html, useProgress } from '@react-three/drei';
-import { OBJLoader } from 'three-stdlib';
+import { OBJLoader, GLTFLoader } from 'three-stdlib';
 import * as THREE from 'three';
 
 // Custom Error Boundary for 3D Components
@@ -44,23 +44,28 @@ function Loader() {
   return <Html center>{progress.toFixed(1)} % loaded</Html>;
 }
 
-interface HumanOBJModelProps {
+interface HumanModelProps {
   height: number;
   weight: number;
   shoulder: number;
   chest: number;
   waist: number;
   hip: number;
+  gender: 'male' | 'female';
 }
 
-function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJModelProps) {
-  const obj = useLoader(OBJLoader, '/models/model.OBJ');
+function HumanModel({ height, weight, shoulder, chest, waist, hip, gender }: HumanModelProps) {
+  // Load either OBJ (male) or GLB (female)
+  const isOBJ = gender === 'male';
+  const modelUrl = isOBJ ? '/models/model.OBJ' : '/models/model.glb';
+
+  const loadedModel = useLoader(isOBJ ? OBJLoader : GLTFLoader, modelUrl);
+
+  // Extract scene for GLB or group for OBJ
+  const scene = (loadedModel as any).scene || loadedModel;
 
   // Clone the object to avoid mutating the cached original directly
-  const clonedObj = React.useMemo(() => obj.clone(), [obj]);
-  const meshRef = useRef<THREE.Group>(null);
-
-  // Store original positions to avoid accumulation errors
+  const clonedObj = React.useMemo(() => scene.clone(), [scene]);
   const originalPositionsRef = useRef<Map<string, Float32Array>>(new Map());
 
   // Capture original positions once
@@ -73,7 +78,6 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJ
         const geometry = child.geometry;
         if (!geometry.attributes.position) return;
 
-        // Save original positions if not already saved
         if (!originalPositionsRef.current.has(child.uuid)) {
           originalPositionsRef.current.set(child.uuid, geometry.attributes.position.array.slice());
         }
@@ -91,18 +95,11 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJ
         const positions = geometry.attributes.position;
         const originalArray = originalPositionsRef.current.get(child.uuid)!;
 
-        // Heuristic constants for model height (assuming model is roughly 1.7m - 1.8m tall in local units)
-        // Adjust these thresholds based on where body parts actually are on your specific OBJ
-        // Normalized Y usually: Head ~1.7, Neck ~1.5, Shoulder ~1.4, Chest ~1.3, Waist ~1.0, Hip ~0.8, Knees ~0.5
-
-        // Find bounding box to normalize Y
         geometry.computeBoundingBox();
         const minY = geometry.boundingBox?.min.y || 0;
         const maxY = geometry.boundingBox?.max.y || 1.8;
         const rangeY = maxY - minY;
-
-        // Calculate approximate center X of the model to distinguish left/right
-        const centerX = (geometry.boundingBox?.min.x + geometry.boundingBox?.max.x) / 2;
+        const centerX = (geometry.boundingBox?.min.x + (geometry.boundingBox?.max.x || 0)) / 2;
 
         for (let i = 0; i < positions.count; i++) {
           const ix = i * 3;
@@ -113,57 +110,52 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJ
           const y = originalArray[iy];
           const z = originalArray[iz];
 
-          // Normalize Y (0.0 at feet, 1.0 at head)
           const normY = (y - minY) / rangeY;
-
-          // Distance from center line (spine)
           const distFromSpine = Math.abs(x - centerX);
 
           let scaleX = 1;
           let scaleZ = 1;
 
-          // Global Weight (fat) - affects everything but less on extremities
-          // Hands/Arms usually have larger distFromSpine. 
-          // We want to affect core body more.
           scaleX *= weight;
           scaleZ *= weight;
 
-          // --- Regional Deformations ---
-          // Only apply if vertex is close enough to spine (Torso check)
-          // Assuming model units, if dist > 0.35 it might be arms (adjust based on your model)
-          // We use a "Mask" to fade out effect on arms
-          const torsoMask = Math.max(0, 1 - Math.pow(distFromSpine / 0.35, 2)); // Fade out as we go away from center
+          // Regional Deformations (Approximate thresholds)
+          const torsoThreshold = isOBJ ? 0.35 : 0.25; // GLB models often have different scales
+          const torsoMask = Math.max(0, 1 - Math.pow(distFromSpine / torsoThreshold, 2));
 
           if (torsoMask > 0.1) {
-            // Shoulder (High Y: ~0.75 - 0.9)
-            if (normY > 0.75 && normY < 0.95) {
-              const influence = (1 - Math.abs(normY - 0.85) / 0.15) * torsoMask;
-              if (influence > 0) {
-                scaleX += (shoulder - 1) * influence;
-              }
+            // Adjust normY ranges slightly if female model has different proportions
+            // Shoulder (High Y)
+            if (normY > 0.7 && normY < 0.95) {
+              const targetY = isOBJ ? 0.85 : 0.82;
+              const influence = (1 - Math.abs(normY - targetY) / 0.15) * torsoMask;
+              if (influence > 0) scaleX += (shoulder - 1) * influence;
             }
 
-            // Chest (Upper Mid Y: ~0.6 - 0.8)
-            if (normY > 0.6 && normY < 0.8) {
-              const influence = (1 - Math.abs(normY - 0.7) / 0.15) * torsoMask;
+            // Chest
+            if (normY > 0.55 && normY < 0.8) {
+              const targetY = isOBJ ? 0.7 : 0.68;
+              const influence = (1 - Math.abs(normY - targetY) / 0.15) * torsoMask;
               if (influence > 0) {
                 scaleX += (chest - 1) * 0.8 * influence;
                 scaleZ += (chest - 1) * influence;
               }
             }
 
-            // Waist (Mid Y: ~0.45 - 0.6)
-            if (normY > 0.45 && normY < 0.65) {
-              const influence = (1 - Math.abs(normY - 0.55) / 0.15) * torsoMask;
+            // Waist
+            if (normY > 0.4 && normY < 0.65) {
+              const targetY = isOBJ ? 0.55 : 0.52;
+              const influence = (1 - Math.abs(normY - targetY) / 0.15) * torsoMask;
               if (influence > 0) {
                 scaleX += (waist - 1) * influence;
                 scaleZ += (waist - 1) * influence;
               }
             }
 
-            // Hip (Low Mid Y: ~0.3 - 0.5)
-            if (normY > 0.3 && normY < 0.55) {
-              const influence = (1 - Math.abs(normY - 0.42) / 0.15) * torsoMask;
+            // Hip
+            if (normY > 0.25 && normY < 0.55) {
+              const targetY = isOBJ ? 0.42 : 0.38;
+              const influence = (1 - Math.abs(normY - targetY) / 0.15) * torsoMask;
               if (influence > 0) {
                 scaleX += (hip - 1) * influence;
                 scaleZ += (hip - 1) * influence;
@@ -171,22 +163,21 @@ function HumanOBJModel({ height, weight, shoulder, chest, waist, hip }: HumanOBJ
             }
           }
 
-          // Apply transforms
-          // We transform from the center X/Z (assuming model is centered at 0,0)
           positions.setX(i, x * scaleX);
+          positions.setY(i, y * height); // Apply height directly to Y
           positions.setZ(i, z * scaleZ);
-          // Height is handled by root scale, but we could modify Y here too if needed.
         }
 
         positions.needsUpdate = true;
-        geometry.computeVertexNormals(); // Recompute lighting
+        geometry.computeVertexNormals();
+        geometry.computeBoundingBox(); // Important for Center component
       }
     });
 
-  }, [clonedObj, height, weight, shoulder, chest, waist, hip]);
+  }, [clonedObj, height, weight, shoulder, chest, waist, hip, gender, isOBJ]);
 
-  // Height is handled globally as it linearly stretches positions
-  return <primitive object={clonedObj} scale={[1, height, 1]} />;
+  // Height is now handled in the vertex loop for better consistency across formats
+  return <primitive object={clonedObj} />;
 }
 
 function FallbackModel({ height, shoulder }: any) {
@@ -198,14 +189,13 @@ function FallbackModel({ height, shoulder }: any) {
   );
 }
 
-export default function Avatar3D({ height, weight, shoulder, chest, waist, hip }: HumanOBJModelProps) {
+export default function Avatar3D({ height, weight, shoulder, chest, waist, hip, gender }: HumanModelProps) {
   const [modelError, setModelError] = useState<string | null>(null);
-  const [debugMode, setDebugMode] = useState(false); // Default off now
+  const [debugMode, setDebugMode] = useState(false);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 0, background: 'linear-gradient(to bottom, #f0f2f5, #e1e4e8)', borderRadius: 16, overflow: 'hidden' }}>
 
-      {/* Debug Controls */}
       <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 10, background: 'rgba(0,0,0,0.5)', padding: 5, borderRadius: 4, color: '#fff', fontSize: 12 }}>
         <label>
           <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} /> Debug View
@@ -237,13 +227,14 @@ export default function Avatar3D({ height, weight, shoulder, chest, waist, hip }
               fallback={<FallbackModel height={height} shoulder={shoulder} />}
               onError={(e) => setModelError(e.message || "Failed to load model")}
             >
-              <HumanOBJModel
+              <HumanModel
                 height={height}
                 weight={weight}
                 shoulder={shoulder}
                 chest={chest}
                 waist={waist}
                 hip={hip}
+                gender={gender}
               />
             </ModelErrorBoundary>
           </Center>
