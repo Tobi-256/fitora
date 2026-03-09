@@ -46,10 +46,10 @@ export const getAllProducts = async (req, res) => {
   try {
     // Lấy tham số từ URL: ví dụ GET /products?category=abc&limit=20
     const { category, limit } = req.query;
-    
+
     const filters = {};
     if (category) {
-        filters.category = category; // Map vào bộ lọc của Model
+      filters.category = category; // Map vào bộ lọc của Model
     }
 
     // Gọi hàm list có sẵn trong Model
@@ -65,29 +65,29 @@ export const getAllProducts = async (req, res) => {
 //   try {
 //     const fullProductList = [
 //       {
-//         name: "Quần Dài Form Rộng PN-STORE",
-//         price: 159000,
+//         name: "Áo Dài Đỏ ",
+//         price: 2500000,
 //         category: "Pants",
-//         brand: "PN Store 1993s",
-//         description: "- Quần Dài Form Rộng PN.STORE vải nỉ 2da Track Pants Unisex Nam Nữ Local Brand Đứng Form Co Giãn Tốt Menswear Đen Q2DA \n- Quần dài nam nỉ 2 da là sản phẩm được làm từ chất liệu nỉ 2 da, giúp giữ ẩm tốt hơn so với các loại chất liệu khác. ",
-//         image: "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m2aqvljd0tyqd6@resize_w450_nl.webp",
-        
+//         brand: "deThuong Fashion",
+//         description: "Áo dài đỏ rực rỡ, biểu tượng của sự may mắn và hạnh phúc trong văn hóa Việt Nam. Thiết kế truyền thống kết hợp với chất liệu cao cấp, tạo nên vẻ đẹp duyên dáng và sang trọng cho người mặc.",
+//         image: "https://i.postimg.cc/JzXxY9Xy/ao-dai-do.jpg",
+
 //         // 1. TÍCH HỢP MODEL 3D THEO SIZE
 //         // Đường dẫn trỏ tới thư mục fe/public/quan_ao/ của bạn
 //         threeDModels: {
-          
-//           L: "/quan/quan_dai_1.glb",
-//         },
+//           "L":  "/ao/aodai.glb"
+//           },
+        
 
-//         sizes: [ "M"],
+//         sizes: ["L"],
 
 //         variants: [
-//           { color: "#acabb0", image: "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m2qjijy5herqab@resize_w450_nl.webp" },
+//           { color: "#e12255", image: "https://i.postimg.cc/JzXxY9Xy/ao-dai-do.jpg" },
 
 //         ]
 //       },
-     
-   
+
+
 //     ];
 
 //     let count = 0;
@@ -96,8 +96,8 @@ export const getAllProducts = async (req, res) => {
 //       count++;
 //     }
 
-//     res.status(200).json({ 
-//       message: `SUCCESS! Đã thêm ${count} sản phẩm có tích hợp Model 3D vào kho!` 
+//     res.status(200).json({
+//       message: `SUCCESS! Đã thêm ${count} sản phẩm có tích hợp Model 3D vào kho!`
 //     });
 //   } catch (error) {
 //     res.status(500).json({ message: "Lỗi nạp dữ liệu: " + error.message });

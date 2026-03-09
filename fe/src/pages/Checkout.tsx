@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import  { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/useCart';
 import { orderService } from '../services/api';
 import { message, Form, Input, Radio, Button, Card, Row, Col, Divider, Space, Empty } from 'antd';
-import { ShoppingCartOutlined, CreditCardOutlined, UserOutlined, PhoneOutlined, HomeOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import {  CreditCardOutlined, UserOutlined, PhoneOutlined, HomeOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -120,9 +120,6 @@ const Checkout = () => {
                   <Space direction="vertical" style={{ width: '100%' }}>
                     <Card size="small" hoverable style={{ border: '1px solid #f0f0f0' }}>
                       <Radio value="COD">Thanh toán khi nhận hàng (COD)</Radio>
-                    </Card>
-                    <Card size="small" hoverable style={{ border: '1px solid #f0f0f0' }}>
-                      <Radio value="BANKING">Chuyển khoản ngân hàng (Banking)</Radio>
                     </Card>
                   </Space>
                 </Radio.Group>
