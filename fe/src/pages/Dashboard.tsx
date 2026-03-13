@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { auth } from '../config/firebase'; 
+import { auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
 
 import {
@@ -11,7 +11,8 @@ import {
 import {
   UserOutlined, DashboardOutlined, LogoutOutlined,
   TeamOutlined, DollarOutlined, RiseOutlined,
-  ShoppingOutlined
+  ShoppingOutlined,
+  FallOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import './Dashboard.css';
@@ -21,7 +22,7 @@ const { Title } = Typography;
 
 // ==========================================
 // CHỖ ĐỂ ÔNG ĐỔI SỐ CỨNG Ở ĐÂY NÈ
-const HARDCODED_REVENUE = 925000; // Ví dụ: 50 triệu VNĐ
+const HARDCODED_REVENUE = 10545000; // Ví dụ: 50 triệu VNĐ
 // ==========================================
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -186,7 +187,24 @@ const Dashboard = () => {
           style={{ marginTop: '16px' }}
           items={[
             { key: '1', icon: <DashboardOutlined />, label: 'Tổng quan' },
-            { key: '2', icon: <TeamOutlined />, label: 'Quản lý User' },
+            {
+              key: 'revenue', // Key mới cho phần thống kê
+              icon: <RiseOutlined />, // Icon biểu đồ tăng trưởng
+              label: 'Thống kê doanh thu',
+              onClick: () => navigate('/admin/revenue') // Đường dẫn đến trang biểu đồ tôi vừa viết
+            },
+            {
+              key: 'returns', // Key mới cho phần tỷ lệ đổi trả
+              icon: <FallOutlined />, // Icon thể hiện sự sụt giảm (tỷ lệ giảm là tốt)
+              label: 'Tỷ lệ đổi trả',
+              onClick: () => navigate('/admin/returns') // Đường dẫn tới file ReturnRateChart.tsx
+            },
+            // {
+            //   key: '2',
+            //   icon: <TeamOutlined />,
+            //   label: 'Quản lý User',
+            //   onClick: () => navigate('/admin/users') // Thêm dòng này để link đi
+            // },
             { key: '3', icon: <ShoppingOutlined />, label: 'Duyệt đơn hàng', onClick: () => navigate('/admin/orders') },
             { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', onClick: handleLogout, danger: true },
           ]}

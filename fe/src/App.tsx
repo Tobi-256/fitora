@@ -24,6 +24,9 @@ import Checkout from './pages/Checkout.tsx';
 import OrderHistory from './pages/OrderHistory.tsx';
 import OrderDetail from './pages/OrderDetail.tsx';
 import AdminOrders from './pages/AdminOrders';
+import RevenueStats from './pages/doanh_thu.tsx';
+import ReturnRateChart from './pages/ReturnRateChart';
+import UserManagement from './pages/UserManagement.tsx';
 
 // Layout cho các trang người dùng thường (Có Header + Main Content)
 const MainLayout = () => {
@@ -59,6 +62,9 @@ function App() {
                   {/* --- KHU VỰC ADMIN (KHÔNG CÓ HEADER WEBSITE) --- */}
                   <Route element={<AdminRoute />}>
                     <Route path="/admin/dashboard" element={<Dashboard />} />
+                    <Route path="/admin/users" element={<UserManagement />} />
+                    <Route path="/admin/revenue" element={<RevenueStats />} />
+                    <Route path="/admin/returns" element={<ReturnRateChart />} />
                     <Route path="/admin/orders" element={<AdminOrders />} />
                   </Route>
 

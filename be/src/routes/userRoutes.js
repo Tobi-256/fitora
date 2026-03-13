@@ -18,7 +18,7 @@ import {
 import { sendOTP, verifyOTPCode } from '../controllers/otpController.js';
 import { verifyFirebaseToken, isAdmin } from '../middlewares/auth.js';
 import { uploadAvatar as uploadAvatarMiddleware } from '../utils/upload.js';
-import { getProductDetail, redirectPartner, getAllProducts} from '../controllers/productController.js';
+import { getProductDetail, redirectPartner, getAllProducts,seedProducts} from '../controllers/productController.js';
 import { addToWishlist, getWishlist, removeFromWishlist } from '../controllers/wishlistController.js';
 import { addToCart, getCart, updateCartItem, removeFromCart } from '../controllers/cartController.js';
 import { createOrder, getMyOrders, getOrderDetail, updateOrderStatus } from '../controllers/orderController.js';
@@ -80,7 +80,7 @@ router.put('/users/:id', verifyFirebaseToken, isAdmin, updateUser);
 router.delete('/users/:id', verifyFirebaseToken, isAdmin, deleteUser);
 
 // --- PRODUCT ROUTES ---
-//router.get('/products/seed', seedProducts);
+router.get('/products/seed', seedProducts);
 router.get('/products', getAllProducts);               // Xem list products
 router.get('/products/:id', getProductDetail);         // Xem chi tiết
 router.post('/products/redirect', redirectPartner);    // Redirect Partner  
