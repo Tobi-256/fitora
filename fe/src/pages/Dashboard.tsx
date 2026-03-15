@@ -22,7 +22,9 @@ const { Title } = Typography;
 
 // ==========================================
 // CHỖ ĐỂ ÔNG ĐỔI SỐ CỨNG Ở ĐÂY NÈ
-const HARDCODED_REVENUE = 10545000; // Ví dụ: 50 triệu VNĐ
+const HARDCODED_REVENUE = 10545000; 
+const HARDCODED_TOTAL_USERS = 100;    // <--- Số cứng Tổng người dùng
+const HARDCODED_NEW_USERS = 75;      // <--- Số cứng Người dùng mới
 // ==========================================
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -48,9 +50,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalRevenue: HARDCODED_REVENUE, // Gán số cứng ngay từ đầu
-    newUsers: 0,
+    totalUsers: HARDCODED_TOTAL_USERS,   // Gán số cứng
+    totalRevenue: HARDCODED_REVENUE, 
+    newUsers: HARDCODED_NEW_USERS,       // Gán số cứng
     totalAdmins: 0,
   });
   const [users, setUsers] = useState<UserData[]>([]);
@@ -78,10 +80,11 @@ const Dashboard = () => {
 
       if (statsRes.data.success) {
         setStats({
-          totalUsers: statsRes.data.data.totalUsers,
-          totalRevenue: HARDCODED_REVENUE, // Tiếp tục ép dùng số cứng sau khi load xong các stats khác
-          newUsers: statsRes.data.data.newUsers,
-          totalAdmins: statsRes.data.data.totalAdmins,
+          // Ép tất cả về số cứng theo ý ông
+          totalUsers: HARDCODED_TOTAL_USERS,
+          totalRevenue: HARDCODED_REVENUE,
+          newUsers: HARDCODED_NEW_USERS,
+          totalAdmins: statsRes.data.data.totalAdmins, // Riêng cái này vẫn lấy từ API (hoặc ông thích thì sửa tiếp)
         });
       }
 
@@ -188,23 +191,17 @@ const Dashboard = () => {
           items={[
             { key: '1', icon: <DashboardOutlined />, label: 'Tổng quan' },
             {
-              key: 'revenue', // Key mới cho phần thống kê
-              icon: <RiseOutlined />, // Icon biểu đồ tăng trưởng
+              key: 'revenue',
+              icon: <RiseOutlined />,
               label: 'Thống kê doanh thu',
-              onClick: () => navigate('/admin/revenue') // Đường dẫn đến trang biểu đồ tôi vừa viết
+              onClick: () => navigate('/admin/revenue')
             },
             {
-              key: 'returns', // Key mới cho phần tỷ lệ đổi trả
-              icon: <FallOutlined />, // Icon thể hiện sự sụt giảm (tỷ lệ giảm là tốt)
+              key: 'returns',
+              icon: <FallOutlined />,
               label: 'Tỷ lệ đổi trả',
-              onClick: () => navigate('/admin/returns') // Đường dẫn tới file ReturnRateChart.tsx
+              onClick: () => navigate('/admin/returns')
             },
-            // {
-            //   key: '2',
-            //   icon: <TeamOutlined />,
-            //   label: 'Quản lý User',
-            //   onClick: () => navigate('/admin/users') // Thêm dòng này để link đi
-            // },
             { key: '3', icon: <ShoppingOutlined />, label: 'Duyệt đơn hàng', onClick: () => navigate('/admin/orders') },
             { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', onClick: handleLogout, danger: true },
           ]}
@@ -233,7 +230,6 @@ const Dashboard = () => {
               </Card>
             </Col>
 
-            {/* MỤC DOANH THU - ĐANG DÙNG SỐ CỨNG */}
             <Col xs={24} sm={12} lg={6}>
               <Card bordered={false} hoverable>
                 <Statistic
