@@ -1,0 +1,83 @@
+/* 1. Tùy chỉnh nền (Ghi đè style inline nếu muốn đẹp hơn) */
+.ant-layout {
+  background: linear-gradient(135deg, #001529 0%, #003a70 100%) !important;
+  /* Thêm hình nền mờ ảo nếu thích (optional) */
+  /* background-image: url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg') !important; */
+  background-size: cover;
+}
+
+/* 2. Hiệu ứng xuất hiện nhẹ nhàng cho cái Card */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ant-card {
+  animation: fadeInUp 0.6s ease-out;
+  border: none !important;
+  /* Đổ bóng sâu hơn để tạo cảm giác nổi */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(10px); /* Nếu nền có ảnh thì cái này làm mờ kính rất đẹp */
+}
+
+/* 3. Tùy chỉnh Input (Ô nhập liệu) */
+.ant-input-affix-wrapper {
+  padding: 10px 11px !important; /* Tăng chiều cao ô nhập cho dễ nhìn */
+  border-radius: 6px !important;
+  background-color: #f9f9f9 !important;
+  border: 1px solid #e6e6e6 !important;
+  transition: all 0.3s;
+}
+
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  background-color: #fff !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* 4. Tùy chỉnh Nút Đăng nhập */
+.ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary:hover {
+  background: #40a9ff !important;
+  border-color: #40a9ff !important;
+  transform: translateY(-2px); /* Nút nảy lên nhẹ khi di chuột vào */
+  box-shadow: 0 6px 15px rgba(24, 144, 255, 0.4);
+}
+
+/* 5. Icon cái khiên bảo mật */
+.anticon-safety-certificate {
+  transition: transform 0.3s ease;
+}
+
+/* Khi di chuột vào cái Card thì icon xoay nhẹ */
+.ant-card:hover .anticon-safety-certificate {
+  transform: scale(1.1);
+  color: #40a9ff !important;
+}
+
+/* 6. Link quay về trang chủ */
+a {
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #1890ff !important;
+  text-decoration: underline;
+}

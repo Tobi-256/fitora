@@ -264,7 +264,7 @@ const ProductDetail: React.FC = () => {
             className="btn-try-on"
             onClick={handleVirtualTryOn}
           >
-            Virtual Try On
+            Phòng Thử Đồ
           </button>
 
           {/* NÚT THÊM GIỎ HÀNG ĐÃ CẬP NHẬT LOGIC */}

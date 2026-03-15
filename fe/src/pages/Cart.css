@@ -57,7 +57,7 @@
 .item-image {
     width: 100px;
     height: 130px;
-    object-cover: cover;
+    accent-color: cover;
     border-radius: 8px;
 }
 

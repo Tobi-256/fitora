@@ -48,7 +48,7 @@ const ProductList: React.FC = () => {
   return (
     <div className="container">
       {/* Tiêu đề */}
-      <h2 className="section-title">Products</h2>
+      <h2 className="section-title">Sản Phẩm</h2>
 
       {/* ĐÃ XÓA PHẦN TABS CATEGORY Ở ĐÂY */}
 
@@ -80,7 +80,7 @@ const ProductList: React.FC = () => {
                   className="see-more"
                   onClick={() => navigate(`/product/${item.id}`)}
                 >
-                  See-more
+                  Xem chi tiết
                 </span>
               </div>
             </div>

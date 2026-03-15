@@ -69,14 +69,12 @@ export const seedProducts = async (req, res) => {
         price: 1990000,
         category: "Pants",
         brand: "deThuong Fashion",
-        description: "Áo dài đỏ rực rỡ, biểu tượng của sự may mắn và hạnh phúc trong văn hóa Việt Nam. Thiết kế truyền thống kết hợp với chất liệu cao cấp, tạo nên vẻ đẹp duyên dáng và sang trọng cho người mặc.",
-        image: "https://i.postimg.cc/JzXxY9Xy/ao-dai-do.jpg",
+        description: "Đầm suông dự tiệc lụa hồng ruốc – Dịu dàng nổi bật \n Thiết kế đầm suông thanh lịch, dài ngang gối, tôn dáng mà vẫn tạo sự thoải mái cho người mặc. Điểm nhấn độc đáo nằm ở đường bèo dún mềm mại chạy dọc từ cổ xuống một bên sườn, mang đến cảm giác uyển chuyển, duyên dáng trong từng bước đi.\n Chất liệu lụa cao cấp, mịn màng, nhẹ nhàng nâng niu làn da, kết cấu 2 lớp giúp đầm đứng phom vừa phải, không lộ, tạo độ rũ nhẹ nhàng đầy nữ tính.\n Gam màu hồng trang nhã, sang trọng, dễ phối phụ kiện, phù hợp cho các buổi tiệc nhẹ, gặp gỡ đối tác hay sự kiện trang trọng.",
+        image: "https://bizweb.dktcdn.net/100/326/014/products/d15afc83-3b12-4c11-a211-1a45edc91d01.jpg?v=1754490296597",
 
         // 1. TÍCH HỢP MODEL 3D THEO SIZE
         // Đường dẫn trỏ tới thư mục fe/public/quan_ao/ của bạn
-        threeDModels: {
-          "L":  "/ao/aodai.glb"
-          },
+       
         
 
         sizes: ["L", "M", "XL"],

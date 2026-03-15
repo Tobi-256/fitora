@@ -1,25 +1,10 @@
 /* Container chính: Chiếm full màn hình */
 .dashboard-layout {
-<<<<<<< HEAD
-  min-height: 100vh;
-=======
     min-height: 100vh;
->>>>>>> origin/deploy
 }
 
 /* Logo ở góc trên bên trái Sidebar */
 .dashboard-logo {
-<<<<<<< HEAD
-  height: 64px;
-  line-height: 64px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #fff;
-  background: #001529; /* Trùng màu sidebar */
-  letter-spacing: 2px;
-  border-bottom: 1px solid #ffffff1a;
-=======
     height: 64px;
     line-height: 64px;
     text-align: center;
@@ -30,25 +15,10 @@
     /* Trùng màu sidebar */
     letter-spacing: 2px;
     border-bottom: 1px solid #ffffff1a;
->>>>>>> origin/deploy
 }
 
 /* Header trắng phía trên */
 .dashboard-header {
-<<<<<<< HEAD
-  padding: 0 24px;
-  background: #fff !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  z-index: 1;
-}
-
-.admin-info {
-  font-weight: 500;
-  color: #555;
-=======
     padding: 0 24px;
     background: #fff !important;
     display: flex;
@@ -61,53 +31,27 @@
 .admin-info {
     font-weight: 500;
     color: #555;
->>>>>>> origin/deploy
 }
 
 /* Vùng nội dung xám ở giữa */
 .dashboard-content {
-<<<<<<< HEAD
-  margin: 24px 16px;
-  padding: 24px;
-  min-height: 280px;
-  /* background: #f0f2f5; Ant Design mặc định layout background là màu này */
-=======
     margin: 24px 16px;
     padding: 24px;
     min-height: 280px;
     /* background: #f0f2f5; Ant Design mặc định layout background là màu này */
->>>>>>> origin/deploy
 }
 
 /* Màn hình loading full */
 .dashboard-loading {
-<<<<<<< HEAD
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: #f0f2f5;
-=======
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     background: #f0f2f5;
->>>>>>> origin/deploy
 }
 
 /* Style cho các thẻ Card thống kê */
 .stat-card {
-<<<<<<< HEAD
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-=======
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     border-radius: 8px;
     transition: all 0.3s;
@@ -116,37 +60,21 @@
 .stat-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
->>>>>>> origin/deploy
 }
 
 /* Style vùng chứa bảng */
 .table-container {
-<<<<<<< HEAD
-  background: #fff;
-  padding: 24px;
-  border-radius: 8px;
-  margin-top: 24px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-=======
     background: #fff;
     padding: 24px;
     border-radius: 8px;
     margin-top: 24px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
->>>>>>> origin/deploy
 }
 
 /* Responsive cho mobile */
 @media (max-width: 768px) {
-<<<<<<< HEAD
-  .dashboard-content {
-    margin: 16px 8px;
-    padding: 16px;
-  }
-=======
     .dashboard-content {
         margin: 16px 8px;
         padding: 16px;
     }
->>>>>>> origin/deploy
 }

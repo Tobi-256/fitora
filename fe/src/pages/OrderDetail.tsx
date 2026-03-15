@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Package, MapPin, CreditCard, User, 
-  ChevronLeft, Printer, Clock, Truck, CheckCircle 
+  Package, MapPin, 
+  ChevronLeft,Clock,  CheckCircle 
 } from 'lucide-react';
 import { orderService } from '../services/api'; // Đảm bảo import đúng service
 

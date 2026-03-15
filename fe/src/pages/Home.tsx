@@ -17,19 +17,19 @@ export const Home = () => {
     <div className="home-page">
       <div className="home-hero">
         <div className="home-hero-content">
-          <h1 className="home-hero-title">Try Before You Buy</h1>
+          <h1 className="home-hero-title">Thử trước khi mua</h1>
           <p className="home-hero-subtitle">
-            Experience your perfect fit in 3D before purchasing
+           Trải nghiệm vừa vặn hoàn hảo của bạn trong 3D trước khi mua
           </p>
           <Link to={currentUser ? "/try-on" : "/register"}>
             <button className="home-hero-button">
-              Start Virtual Try-On
+              Bắt đầu Thử Ảo
             </button>
           </Link>
           <ul className="home-features-list">
-            <li>Personalized Fit</li>
-            <li>3D View</li>
-            <li>Easy Shopping</li>
+            <li>Vừa vặn cá nhân</li>
+            <li>Chế độ xem 3D</li>
+            <li>Mua sắm dễ dàng</li>
           </ul>
         </div>
       </div>

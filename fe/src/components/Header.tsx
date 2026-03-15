@@ -76,25 +76,25 @@ export const Header = () => {
             // --- MENU KHI ĐÃ ĐĂNG NHẬP (CÓ HIỆN WISHLIST) ---
             <>
               <Link to="/">
-                <Button type="text" className="nav-link-btn">HOME</Button>
+                <Button type="text" className="nav-link-btn">Trang Chủ</Button>
               </Link>
               <Link to="/product">
-                <Button type="text" className="nav-link-btn">PRODUCT</Button>
+                <Button type="text" className="nav-link-btn">Sản Phẩm</Button>
               </Link>
               <Link to="/try-on">
-                <Button type="text" className="nav-link-btn">TRY-ON</Button>
+                <Button type="text" className="nav-link-btn">Phòng Thử Đồ</Button>
               </Link>
 
               {/* Chỉ hiện Wishlist khi đã Login */}
               <Link to="/wishlist">
                 <Button type="text" className="nav-link-btn">
-                  <HeartOutlined /> WISHLIST
+                  <HeartOutlined /> Danh Sách Yêu Thích
                 </Button>
               </Link>
 
               <Link to="/cart">
                 <Button type="text" className="nav-link-btn">
-                  <ShoppingCartOutlined /> CART
+                  <ShoppingCartOutlined /> Giỏ Hàng
                 </Button>
               </Link>
 
@@ -112,7 +112,7 @@ export const Header = () => {
                         <Link to="/profile" style={{ color: '#000', textDecoration: 'none' }}>
                           <Space>
                             <ProfileOutlined />
-                            <span>Profile</span>
+                            <span>Thông Tin Cá Nhân</span>
                           </Space>
                         </Link>
                       ),
@@ -122,7 +122,7 @@ export const Header = () => {
                       label: (
                         <Space>
                           <LockOutlined />
-                          <span>Change Password</span>
+                          <span> Thay Đổi Mật Khẩu </span>
                         </Space>
                       ),
                       onClick: handleChangePassword,
@@ -136,7 +136,7 @@ export const Header = () => {
                         <Link to="/my-orders" style={{ color: '#000', textDecoration: 'none' }}>
                           <Space>
                             <HistoryOutlined />
-                            <span>Order History</span>
+                            <span>Lịch Sử Đơn Hàng</span>
                           </Space>
                         </Link>
                       ),
@@ -146,7 +146,7 @@ export const Header = () => {
                       label: (
                         <Space>
                           <LogoutOutlined />
-                          <span>Logout</span>
+                          <span>Đăng xuất</span>
                         </Space>
                       ),
                       onClick: handleLogout,
@@ -174,19 +174,19 @@ export const Header = () => {
             // --- MENU KHI CHƯA ĐĂNG NHẬP (KHÔNG CÓ WISHLIST) ---
             <>
               <Link to="/">
-                <Button type="text" className="nav-link-btn">HOME</Button>
+                <Button type="text" className="nav-link-btn">Trang Chủ</Button>
               </Link>
 
               <Link to="/product">
-                <Button type="text" className="nav-link-btn">PRODUCT</Button>
+                <Button type="text" className="nav-link-btn">Sản Phẩm</Button>
               </Link>
 
               <Link to="/try-on">
-                <Button type="text" className="nav-link-btn">TRY-ON</Button>
+                <Button type="text" className="nav-link-btn">Phòng Thử Đồ</Button>
               </Link>
 
               <Link to="/login">
-                <Button type="text" className="nav-link-btn">LOGIN</Button>
+                <Button type="text" className="nav-link-btn">Đăng Nhập</Button>
               </Link>
 
             </>
